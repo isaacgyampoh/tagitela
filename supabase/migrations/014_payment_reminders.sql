@@ -7,7 +7,7 @@ SELECT cron.schedule(
   '15 * * * *',
   $$
   SELECT net.http_post(
-    url := 'https://YOUR_TAGITELA_PROJECT.supabase.co/functions/v1/charge-momo?action=remind',
+    url := 'https://nyrjuuynklrmyzgsgmwm.supabase.co/functions/v1/charge-momo?action=remind',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
       'Authorization', 'Bearer YOUR_TAGITELA_ANON_KEY'

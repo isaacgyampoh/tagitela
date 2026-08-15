@@ -38,7 +38,7 @@ export default function Products() {
         const b64 = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result)); r.onerror = rej; r.readAsDataURL(file) })
         let ok = false
         try {
-          const r = await fetch('https://YOUR_TAGITELA_PROJECT.supabase.co/functions/v1/charge-momo?action=upload-image', {
+          const r = await fetch('https://nyrjuuynklrmyzgsgmwm.supabase.co/functions/v1/charge-momo?action=upload-image', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ data: b64, contentType: file.type || 'image/jpeg', ext })
           })
@@ -50,7 +50,7 @@ export default function Products() {
           const path = `products/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
           const { error: upErr } = await sb.storage.from('product-images').upload(path, file, { cacheControl: '31536000', upsert: true, contentType: file.type || 'image/jpeg' })
           if (upErr) { toast.error('Upload failed: ' + (upErr.message || '')); setLoading(false); return }
-          imageUrl = `https://YOUR_TAGITELA_PROJECT.supabase.co/storage/v1/object/public/product-images/${path}`
+          imageUrl = `https://nyrjuuynklrmyzgsgmwm.supabase.co/storage/v1/object/public/product-images/${path}`
         }
       } catch (e) { console.error('Image upload failed:', e); toast.error('Image upload failed: ' + (e?.message || '')); setLoading(false); return }
     }

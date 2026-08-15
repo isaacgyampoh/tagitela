@@ -28,6 +28,7 @@ const RefundsPage = lazy(() => import('./pages/RefundsPage'))
 const ReportsPage = lazy(() => import('./pages/ReportsPage'))
 const PromosPage = lazy(() => import('./pages/PromosPage'))
 const InvoicesPage = lazy(() => import('./pages/InvoicesPage'))
+const DocumentsPage = lazy(() => import('./pages/DocumentsPage'))
 const StockTakesPage = lazy(() => import('./pages/StockTakesPage'))
 const StockAdjustmentsPage = lazy(() => import('./pages/StockAdjustmentsPage'))
 const RestockPage = lazy(() => import('./pages/RestockPage'))
@@ -38,7 +39,7 @@ const DeliveryDetails = lazy(() => import('./pages/DeliveryDetails'))
 const CustomerDisplay = lazy(() => import('./pages/CustomerDisplay'))
 
 const INACTIVITY_TIMEOUT = 60 * 1000 // 1 minute
-const ADMIN_PAGES = ['products', 'staff', 'promos', 'invoices', 'stocktakes', 'stockadjustments', 'restock', 'wasettings']
+const ADMIN_PAGES = ['products', 'staff', 'promos', 'invoices', 'stocktakes', 'stockadjustments', 'restock', 'wasettings', 'documents']
 // Pages a non-admin may access IF they hold the matching permission.
 const PAGE_PERMISSIONS = {
   products: 'product_management',
@@ -112,7 +113,7 @@ export default function App() {
     if (!user) return
     const run = async () => {
       try {
-        const r = await fetch('https://YOUR_TAGITELA_PROJECT.supabase.co/functions/v1/charge-momo?action=reconcile-payments', { method: 'POST' })
+        const r = await fetch('https://nyrjuuynklrmyzgsgmwm.supabase.co/functions/v1/charge-momo?action=reconcile-payments', { method: 'POST' })
         const j = await r.json()
         if (j?.confirmed > 0) { try { loadAll() } catch {} }
       } catch {}
@@ -243,6 +244,7 @@ export default function App() {
     reports: <ReportsPage />,
     promos: <PromosPage />,
     invoices: <InvoicesPage />,
+    documents: <DocumentsPage />,
     stocktakes: <StockTakesPage />,
     restock: <RestockPage />,
   }

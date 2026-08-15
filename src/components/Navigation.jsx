@@ -42,6 +42,7 @@ const NAV = [
   { id: 'stocktakes', label: 'Stock & Adjust', perm: 'stock_taking' },
   { id: 'sep2', sep: true },
   { id: 'invoices', label: 'Invoices', admin: true },
+  { id: 'documents', label: 'Documents', admin: true },
   { id: 'customers', label: 'Customers', admin: true },
   { id: 'expenses', label: 'Expenses', admin: true },
   { id: 'reports', label: 'Reports', perm: 'reports' },

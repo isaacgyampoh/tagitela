@@ -1,7 +1,7 @@
 -- ============================================
 -- EVERYTINROOM POS - SECURITY HARDENING
 -- Run this in Supabase SQL Editor
--- https://supabase.com/dashboard/project/YOUR_TAGITELA_PROJECT/sql
+-- https://supabase.com/dashboard/project/nyrjuuynklrmyzgsgmwm/sql
 -- ============================================
 
 -- STEP 1: Enable RLS on all tables

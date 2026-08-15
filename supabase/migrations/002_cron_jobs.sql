@@ -5,7 +5,7 @@
 -- Go to: Supabase Dashboard → Database → Extensions → Enable pg_cron and pg_net
 -- Then run this SQL.
 --
--- IMPORTANT: Replace https://YOUR_TAGITELA_PROJECT.supabase.co and YOUR_TAGITELA_ANON_KEY below!
+-- IMPORTANT: Replace https://nyrjuuynklrmyzgsgmwm.supabase.co and YOUR_TAGITELA_ANON_KEY below!
 -- ============================================================================
 
 -- Enable extensions if not already
@@ -18,7 +18,7 @@ SELECT cron.schedule(
   '0 8 * * 1-6',  -- 8:00 AM, Monday to Saturday
   $$
   SELECT net.http_post(
-    url := 'https://YOUR_TAGITELA_PROJECT.supabase.co/functions/v1/sms-reports?type=morning',
+    url := 'https://nyrjuuynklrmyzgsgmwm.supabase.co/functions/v1/sms-reports?type=morning',
     headers := '{"Authorization": "Bearer YOUR_TAGITELA_ANON_KEY"}'::jsonb,
     body := '{}'::jsonb
   );
@@ -31,7 +31,7 @@ SELECT cron.schedule(
   '0 12 * * 1-6',
   $$
   SELECT net.http_post(
-    url := 'https://YOUR_TAGITELA_PROJECT.supabase.co/functions/v1/sms-reports?type=midday',
+    url := 'https://nyrjuuynklrmyzgsgmwm.supabase.co/functions/v1/sms-reports?type=midday',
     headers := '{"Authorization": "Bearer YOUR_TAGITELA_ANON_KEY"}'::jsonb,
     body := '{}'::jsonb
   );
@@ -44,7 +44,7 @@ SELECT cron.schedule(
   '0 19 * * 1-6',
   $$
   SELECT net.http_post(
-    url := 'https://YOUR_TAGITELA_PROJECT.supabase.co/functions/v1/sms-reports?type=evening',
+    url := 'https://nyrjuuynklrmyzgsgmwm.supabase.co/functions/v1/sms-reports?type=evening',
     headers := '{"Authorization": "Bearer YOUR_TAGITELA_ANON_KEY"}'::jsonb,
     body := '{}'::jsonb
   );
@@ -57,7 +57,7 @@ SELECT cron.schedule(
   '30 19 * * 6',  -- Saturday 7:30 PM
   $$
   SELECT net.http_post(
-    url := 'https://YOUR_TAGITELA_PROJECT.supabase.co/functions/v1/sms-reports?type=weekly',
+    url := 'https://nyrjuuynklrmyzgsgmwm.supabase.co/functions/v1/sms-reports?type=weekly',
     headers := '{"Authorization": "Bearer YOUR_TAGITELA_ANON_KEY"}'::jsonb,
     body := '{}'::jsonb
   );
@@ -70,7 +70,7 @@ SELECT cron.schedule(
   '0 9 1 * *',
   $$
   SELECT net.http_post(
-    url := 'https://YOUR_TAGITELA_PROJECT.supabase.co/functions/v1/sms-reports?type=monthly',
+    url := 'https://nyrjuuynklrmyzgsgmwm.supabase.co/functions/v1/sms-reports?type=monthly',
     headers := '{"Authorization": "Bearer YOUR_TAGITELA_ANON_KEY"}'::jsonb,
     body := '{}'::jsonb
   );
@@ -83,7 +83,7 @@ SELECT cron.schedule(
   '30 8 * * 1-6',
   $$
   SELECT net.http_post(
-    url := 'https://YOUR_TAGITELA_PROJECT.supabase.co/functions/v1/sms-reports?type=lowstock',
+    url := 'https://nyrjuuynklrmyzgsgmwm.supabase.co/functions/v1/sms-reports?type=lowstock',
     headers := '{"Authorization": "Bearer YOUR_TAGITELA_ANON_KEY"}'::jsonb,
     body := '{}'::jsonb
   );

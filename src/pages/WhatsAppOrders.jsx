@@ -16,7 +16,7 @@ export default function WhatsAppOrders() {
   useEffect(() => {
     const run = async () => {
       try {
-        const r = await fetch('https://YOUR_TAGITELA_PROJECT.supabase.co/functions/v1/charge-momo?action=reconcile-payments', { method: 'POST' })
+        const r = await fetch('https://nyrjuuynklrmyzgsgmwm.supabase.co/functions/v1/charge-momo?action=reconcile-payments', { method: 'POST' })
         const j = await r.json()
         if (j?.confirmed > 0) { refreshWAOrders(); toast.success(`${j.confirmed} payment(s) confirmed`) }
       } catch {}
