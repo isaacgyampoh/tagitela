@@ -266,7 +266,7 @@ export default function WhatsAppOrders() {
     <div class="hd-name">Tagitela</div>
     <div class="hd-tag">Your One Stop Shop</div>
     <div class="hd-line"></div>
-    <div class="hd-contact">024 531 5581 &nbsp;&bull;&nbsp; 024 936 5339</div>
+    <div class="hd-contact">054 073 2878 &nbsp;&bull;&nbsp; 057 500 4311</div>
   </div>
 
   <div class="trk">
@@ -278,7 +278,7 @@ export default function WhatsAppOrders() {
   <div class="ship">
     <div class="from">
       <div class="from-label">From Sender</div>
-      <div class="from-val">Tagitela &bull; Aviation Road J382, Adenta, Accra</div>
+      <div class="from-val">Tagitela &bull; Sempe Mensah St, Accra</div>
     </div>
 
     <div class="to-label">Deliver To Recipient</div>

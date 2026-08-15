@@ -77,9 +77,9 @@ const q = async (sb, table, opts = {}) => {
     if (opts.limit) query = query.limit(opts.limit)
     if (opts.gt) query = query.gt(opts.gt[0], opts.gt[1])
     const { data, error } = await query
-    if (error) return []
+    if (error) { console.error(`[load] ${table} failed:`, error.message); return [] }
     return data || []
-  } catch { return [] }
+  } catch (e) { console.error(`[load] ${table} threw:`, e?.message); return [] }
 }
 
 export const useStore = create((set, get) => ({
@@ -198,7 +198,7 @@ export const useStore = create((set, get) => ({
     try {
       // PHASE 1: Only what POS needs immediately
       const [prodData, staffData, bunData, promoData] = await Promise.all([
-        q(sb, 'products', { select: 'id,name,category,cost_price,price,wholesale_price,wholesale_min_qty,quantity,image,group_tag', order: 'name', asc: true }),
+        q(sb, 'products', { order: 'name', asc: true }),
         q(sb, 'staff', { select: 'id,name,role,active' }),
         q(sb, 'bundles', { select: 'id,name,products,bundle_price,active' }),
         q(sb, 'promos', { select: 'id,name,start_date,end_date,items,active', limit: 50 }),
@@ -226,10 +226,10 @@ export const useStore = create((set, get) => ({
     const sb = getSupabase(); if (!sb) return
     try {
       const [saleData, expData, custData, waData, refData, invData, stData, adjData] = await Promise.all([
-        q(sb, 'sales', { select: 'id,receipt_no,date,items,subtotal,discount,total,profit,payment,split_cash,split_momo,customer,type,cashier,voided', order: 'date', limit: 150 }),
+        q(sb, 'sales', { order: 'date', limit: 150 }),
         q(sb, 'expenses', { select: 'id,date,category,description,amount', order: 'date', limit: 100 }),
-        q(sb, 'customers', { select: 'id,phone,visit_count,total_spent,last_visit', order: 'total_spent', limit: 300 }),
-        q(sb, 'whatsapp_orders', { select: 'id,order_no,date,customer_name,customer_phone,items,subtotal,delivery_fee,total,status,ussd_code,paystack_ref,address,notes,paid_at,source,details_filled,tracking_no,delivery_status,delivery_guy', order: 'date', limit: 200 }),
+        q(sb, 'customers', { order: 'created_at', limit: 500 }),
+        q(sb, 'whatsapp_orders', { order: 'date', limit: 200 }),
         q(sb, 'refunds', { order: 'date', limit: 50 }),
         q(sb, 'invoices', { order: 'date', limit: 50 }),
         q(sb, 'stock_takes', { order: 'date', limit: 20 }),
