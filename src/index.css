@@ -4,7 +4,7 @@
 
 * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 html, body, #root { min-height: 100vh; min-height: 100dvh; }
-body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 15px; background: #f6f6f5; color: #16181d; letter-spacing: -0.011em; transition: background .2s ease, color .2s ease; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 15px; background: #f1f3f6; color: #111827; letter-spacing: -0.011em; transition: background .2s ease, color .2s ease; }
 /* Fill correctly in fullscreen/kiosk and on mobile browsers (handles the address bar). */
 .fill-screen { height: 100vh; height: 100dvh; }
 :fullscreen, :-webkit-full-screen { width: 100vw; height: 100vh; }
@@ -24,9 +24,9 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Inter', -apple-system, system-ui, sans-se
 }
 
 /* Refined surfaces — crisp hairline + whisper shadow on the common card
-   pattern, the way Square/Linear-class apps do it. */
-.bg-white.rounded-2xl { box-shadow: 0 1px 2px rgba(16,24,29,.04), 0 1px 1px rgba(16,24,29,.03); border: 1px solid rgba(16,24,29,.05); }
-body.dark .bg-white.rounded-2xl { box-shadow: none; border-color: rgba(255,255,255,.06); }
+   patterns, the way Square/Linear-class apps do it. */
+.bg-white.rounded-2xl, .bg-white.rounded-xl { box-shadow: 0 1px 2px rgba(16,24,29,.05), 0 1px 3px rgba(16,24,29,.04); border: 1px solid rgba(16,24,29,.06); }
+body.dark .bg-white.rounded-2xl, body.dark .bg-white.rounded-xl { box-shadow: none; border-color: rgba(255,255,255,.07); }
 
 @media print {
   @page { size: 80mm auto; margin: 0 4mm; }
@@ -177,3 +177,59 @@ body.dark .border-violet-100,body.dark .border-violet-200 { border-color: rgba(1
 @media (min-width: 768px) {
   .content-shell { margin-left: var(--sidebar-w, 236px); transition: margin-left 0.2s; }
 }
+
+/* ════════════════════════════════════════════════════════════
+   CONTRAST & POLISH PASS
+   Fixes: dark-mode invisibility + light-mode faintness.
+   ════════════════════════════════════════════════════════════ */
+
+/* ---- LIGHT MODE: stronger, more legible text ---- */
+/* Labels/meta were too faint (gray-400/500). Darken for readability. */
+.text-gray-400 { color: #6b7280; }   /* was ~#9ca3af */
+.text-gray-500 { color: #4b5563; }
+.text-stone-400 { color: #6b7280; }
+.text-stone-500 { color: #57534e; }
+/* Body/heading text a touch deeper for crispness */
+.text-gray-600 { color: #374151; }
+.text-gray-700 { color: #1f2937; }
+
+/* ---- DARK MODE: colored status badges stay legible ---- */
+/* Light -100 badge backgrounds -> translucent tint of their hue */
+body.dark .bg-green-100  { background-color: rgba(16,185,129,.18) !important; }
+body.dark .bg-red-100    { background-color: rgba(239,68,68,.18) !important; }
+body.dark .bg-blue-100   { background-color: rgba(59,130,246,.18) !important; }
+body.dark .bg-amber-100  { background-color: rgba(245,158,11,.18) !important; }
+body.dark .bg-violet-100 { background-color: rgba(139,92,246,.18) !important; }
+body.dark .bg-orange-100 { background-color: rgba(249,115,22,.18) !important; }
+/* Their dark -700 text -> bright hue so it reads on the tint */
+body.dark .text-green-700, body.dark .text-green-600 { color: #4ade80 !important; }
+body.dark .text-red-700,   body.dark .text-red-600,  body.dark .text-red-500 { color: #f87171 !important; }
+body.dark .text-blue-700,  body.dark .text-blue-600 { color: #60a5fa !important; }
+body.dark .text-amber-700, body.dark .text-amber-600 { color: #fbbf24 !important; }
+body.dark .text-violet-700,body.dark .text-violet-500 { color: #a78bfa !important; }
+body.dark .text-green-500 { color: #4ade80 !important; }
+
+/* ---- DARK MODE: fix invisible active/inactive pills ---- */
+/* Inactive pill (bg-gray-100 text-gray-500) — lift text so it's readable */
+body.dark .bg-gray-100.text-gray-500,
+body.dark .bg-gray-100 .text-gray-500 { color: #a9adb8 !important; }
+/* Secondary button (bg-gray-200 text-gray-700) — ensure contrast */
+body.dark .bg-gray-200.text-gray-700 { background-color: #2c2f35 !important; color: #e6e7eb !important; }
+/* Active pill (bg-gray-900 text-white) already lifted; ensure the text on the
+   light active pill used in reports (bg-white text-gray-900) stays dark on light */
+body.dark .bg-white.text-gray-900 { color: #0f1115 !important; }
+
+/* Segmented control track in dark */
+body.dark .bg-gray-100.rounded-lg { background-color: #212329 !important; }
+
+/* ---- Sidebar active pill: white bg needs dark text (both modes) ---- */
+/* .text-[#0f1115] is already near-black; it sits on a white pill so it's fine
+   in both themes — no override needed. */
+
+/* ---- Table header contrast ---- */
+.bg-gray-50 .text-gray-400, thead .text-gray-400 { color: #6b7280; }
+body.dark thead.bg-gray-50, body.dark .bg-gray-50 { color: #c9ccd4; }
+
+/* ---- Dividers a touch more visible ---- */
+.divide-gray-100 > * { border-color: #eceef1; }
+body.dark .divide-gray-100 > * { border-color: rgba(255,255,255,.07) !important; }
