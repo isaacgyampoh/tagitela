@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { getSupabase } from '../lib/supabase'
 import { num } from '../lib/utils'
 
-const mapProduct = p => ({ id: p.id, name: p.name, category: p.category || '', costPrice: num(p.cost_price), price: num(p.price), wholesalePrice: num(p.wholesale_price), wholesaleMinQty: num(p.wholesale_min_qty) || 0, quantity: num(p.quantity), image: p.image || '', groupTag: (p.group_tag || '').trim().toLowerCase() })
+const mapProduct = p => ({ id: p.id, name: p.name, category: p.category || '', costPrice: num(p.cost_price), price: num(p.price), wholesalePrice: num(p.wholesale_price), wholesaleMinQty: num(p.wholesale_min_qty) || 0, quantity: num(p.quantity), image: p.image || '', groupTag: (p.group_tag || '').trim().toLowerCase(), tracksBatches: p.tracks_batches || false, sku: p.sku || '', reorderLevel: num(p.reorder_level) || 0, expiryDate: p.expiry_date || null })
 
 // Derive a product's base name by stripping the variant suffix
 // e.g. "2 in 1 coloured curtains(type16)" -> "2 in 1 coloured curtains"

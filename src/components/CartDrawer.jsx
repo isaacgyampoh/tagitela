@@ -65,6 +65,17 @@ export default function CartDrawer({ open, onClose, onReceipt }) {
         if (extraData.splitCash !== undefined) {
           await sb.from('sales').update({ split_cash: num(extraData.splitCash), split_momo: num(extraData.splitMomo) }).eq('receipt_no', data.receiptNo)
         }
+        // FEFO: for any batch-tracked product, deduct from soonest-expiring
+        // batches (this also re-syncs the product's total from its batches, so
+        // it corrects the flat deduction record_sale already did).
+        for (const c of cart) {
+          if (c.productId) {
+            const prod = products.find(p => p.id === c.productId)
+            if (prod?.tracksBatches || prod?.tracks_batches) {
+              try { await sb.rpc('deduct_fefo', { p_product_id: c.productId, p_qty: c.qty, p_by: user?.name || '', p_ref: data.receiptNo }) } catch {}
+            }
+          }
+        }
         deductStock(cart)
         return { receiptNo: data.receiptNo, date: new Date().toISOString(), customer: phone.trim(), cashier: user?.name || '', payment: paymentMethod, type: mode === 'wholesale' ? 'Wholesale' : 'Retail', items: cart, total: data.total, discount: data.discount, splitCash: extraData.splitCash, splitMomo: extraData.splitMomo }
       } else { toast.error(data?.error || error?.message || 'Error'); return null }

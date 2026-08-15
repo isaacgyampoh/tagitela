@@ -42,6 +42,7 @@ const NAV_GROUPS = [
   { section: 'Inventory', items: [
     { id: 'products', label: 'Products', perm: 'product_management' },
     { id: 'stocktakes', label: 'Stock & Adjust', perm: 'stock_taking' },
+    { id: 'batches', label: 'Batches & Expiry', perm: 'product_management' },
     { id: 'restock', label: 'Restock', perm: 'product_receiving' },
     { id: 'receiving', label: 'Goods Received', perm: 'product_receiving' },
     { id: 'promos', label: 'Promos & Bundles', admin: true },

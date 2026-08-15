@@ -29,6 +29,7 @@ const ReportsPage = lazy(() => import('./pages/ReportsPage'))
 const PromosPage = lazy(() => import('./pages/PromosPage'))
 const InvoicesPage = lazy(() => import('./pages/InvoicesPage'))
 const DocumentsPage = lazy(() => import('./pages/DocumentsPage'))
+const BatchesPage = lazy(() => import('./pages/BatchesPage'))
 const StockTakesPage = lazy(() => import('./pages/StockTakesPage'))
 const StockAdjustmentsPage = lazy(() => import('./pages/StockAdjustmentsPage'))
 const RestockPage = lazy(() => import('./pages/RestockPage'))
@@ -39,7 +40,7 @@ const DeliveryDetails = lazy(() => import('./pages/DeliveryDetails'))
 const CustomerDisplay = lazy(() => import('./pages/CustomerDisplay'))
 
 const INACTIVITY_TIMEOUT = 60 * 1000 // 1 minute
-const ADMIN_PAGES = ['products', 'staff', 'promos', 'invoices', 'stocktakes', 'stockadjustments', 'restock', 'wasettings', 'documents']
+const ADMIN_PAGES = ['products', 'staff', 'promos', 'invoices', 'stocktakes', 'stockadjustments', 'restock', 'wasettings', 'documents', 'batches']
 // Pages a non-admin may access IF they hold the matching permission.
 const PAGE_PERMISSIONS = {
   products: 'product_management',
@@ -245,6 +246,7 @@ export default function App() {
     promos: <PromosPage />,
     invoices: <InvoicesPage />,
     documents: <DocumentsPage />,
+    batches: <BatchesPage />,
     stocktakes: <StockTakesPage />,
     restock: <RestockPage />,
   }
