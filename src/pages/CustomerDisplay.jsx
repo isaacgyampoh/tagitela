@@ -95,7 +95,7 @@ export default function CustomerDisplay() {
   // ─── PAID / THANK YOU ───
   if (s.status === 'paid') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#16181d] text-white px-6 relative overflow-hidden">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#1a2420] text-white px-6 relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle at 30% 20%, #fff 0, transparent 45%), radial-gradient(circle at 70% 80%, #fff 0, transparent 40%)' }} />
         <div className="w-24 h-24 rounded-full border-2 border-white/25 flex items-center justify-center mb-9 animate-fade relative">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
@@ -122,9 +122,9 @@ export default function CustomerDisplay() {
   return (
     <div className="fixed inset-0 bg-white overflow-hidden">
       {/* Header — fixed at top */}
-      <header className="fixed top-0 left-0 right-0 z-20 flex items-center gap-3 px-8 py-5 bg-[#16181d] text-white">
+      <header className="fixed top-0 left-0 right-0 z-20 flex items-center gap-3 px-8 py-5 bg-[#1a2420] text-white">
         <LogoFlat height={22} color="#ffffff" accent="#9a9da3" tagline={false} />
-        {s.status === 'paying' && <span className="ml-auto text-sm font-semibold bg-white text-[#16181d] px-4 py-1.5 rounded-full">Complete payment on terminal</span>}
+        {s.status === 'paying' && <span className="ml-auto text-sm font-semibold bg-white text-[#1a2420] px-4 py-1.5 rounded-full">Complete payment on terminal</span>}
       </header>
 
       {empty ? (
@@ -132,17 +132,17 @@ export default function CustomerDisplay() {
           {/* soft breathing halo behind the logo */}
           <div className="absolute w-[460px] h-[460px] rounded-full idle-halo" style={{ background: 'radial-gradient(circle, rgba(16,24,29,0.05) 0%, rgba(16,24,29,0) 70%)' }} />
           <div className="relative idle-breath">
-            <Logo height={120} color="#16181d" accent="#9a9da3" tagline={true} className="mb-10" />
+            <Logo height={120} color="#1a2420" accent="#9a9da3" tagline={true} className="mb-10" />
           </div>
           {/* crossfading info panel — re-keys on idleIdx so it re-animates */}
           <div key={idleIdx} className="idle-rise relative" style={{ minHeight: '120px' }}>
-            <h1 className="text-4xl md:text-5xl font-bold text-[#16181d] mb-3 tracking-tight">{IDLE_PANELS[idleIdx].title}</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-[#1a2420] mb-3 tracking-tight">{IDLE_PANELS[idleIdx].title}</h1>
             <p className="text-lg md:text-xl text-[#8a8d92] max-w-xl">{IDLE_PANELS[idleIdx].sub}</p>
           </div>
           {/* progress dots */}
           <div className="absolute bottom-12 flex gap-2 idle-drift">
             {IDLE_PANELS.map((_, i) => (
-              <span key={i} className={`h-1.5 rounded-full transition-all duration-500 ${i === idleIdx ? 'w-6 bg-[#16181d]' : 'w-1.5 bg-[#d8d9d7]'}`} />
+              <span key={i} className={`h-1.5 rounded-full transition-all duration-500 ${i === idleIdx ? 'w-6 bg-[#1a2420]' : 'w-1.5 bg-[#d8d9d7]'}`} />
             ))}
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function CustomerDisplay() {
 
           {/* Total panel — FIXED to viewport. Physically cannot scroll.
               Bottom bar on portrait/narrow; full-height right column on wide screens. */}
-          <div className="fixed left-0 right-0 bottom-0 lg:left-auto lg:top-0 lg:w-96 z-20 bg-[#16181d] text-white px-8 py-6 lg:py-8 lg:flex lg:flex-col lg:justify-end shadow-[0_-8px_30px_rgba(0,0,0,0.25)] lg:shadow-none">
+          <div className="fixed left-0 right-0 bottom-0 lg:left-auto lg:top-0 lg:w-96 z-20 bg-[#1a2420] text-white px-8 py-6 lg:py-8 lg:flex lg:flex-col lg:justify-end shadow-[0_-8px_30px_rgba(0,0,0,0.25)] lg:shadow-none">
             <div className="flex items-center justify-between lg:block max-w-3xl mx-auto lg:mx-0 w-full">
               <div className="lg:mb-4">
                 <div className="flex items-center gap-2 text-white/50 text-base lg:text-lg lg:mb-2">

@@ -76,8 +76,8 @@ export default function Login() {
                   value={v}
                   className="w-16 h-16 rounded-2xl text-center border-2 focus:outline-none transition-all duration-200"
                   style={{
-                    borderColor: v ? '#0e7c86' : i === filled ? '#0e7c86' : '#d5dae1',
-                    background: v ? '#0e7c86' : '#ffffff',
+                    borderColor: v ? '#1f4d43' : i === filled ? '#1f4d43' : '#d5dae1',
+                    background: v ? '#1f4d43' : '#ffffff',
                     color: 'transparent',
                     caretColor: 'transparent',
                   }}
@@ -95,7 +95,7 @@ export default function Login() {
 
           {loading && (
             <div className="flex justify-center">
-              <div className="w-6 h-6 border-[2.5px] border-[#dde2dc] border-t-[#16181d] rounded-full animate-spin" />
+              <div className="w-6 h-6 border-[2.5px] border-[#dde2dc] border-t-[#1a2420] rounded-full animate-spin" />
             </div>
           )}
         </div>

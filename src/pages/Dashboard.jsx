@@ -70,24 +70,24 @@ export default function Dashboard() {
     <div>
       <div className="flex items-center justify-between mb-7">
         <div>
-          <h1 className="text-[26px] md:text-[30px] font-bold tracking-tight text-gray-900">{greet}, {user?.name || 'Boss'}</h1>
-          <p className="text-gray-400 text-sm mt-1">Here's what's happening in your shop today</p>
+          <h1 className="font-display text-[30px] md:text-[36px] font-semibold tracking-tight text-[#1a2420]">{greet}, {user?.name || 'Boss'}</h1>
+          <p className="text-gray-500 text-sm mt-1.5">Here's what's happening in your shop today</p>
         </div>
       </div>
 
       {/* Online shop on/off */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-4 flex items-center gap-4">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${shopOpen ? 'bg-[#16181d]' : 'bg-gray-200'}`}>
+      <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-4 mb-4 flex items-center gap-4">
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${shopOpen ? 'bg-[#1f4d43]' : 'bg-gray-200'}`}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={shopOpen ? '#fff' : '#8a8d92'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l1-5h16l1 5M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M3 9h18"/></svg>
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-[15px] font-bold text-gray-900">Online Shop</div>
-          <div className="text-[13px] text-gray-400">
+          <div className="text-[13px] text-gray-500">
             {!shopSettingLoaded ? 'Checking…' : shopOpen ? 'Open — customers can order on tagitela.com' : 'Closed — customers see a "back soon" page'}
           </div>
         </div>
         <button onClick={onToggleShop} disabled={toggling || !shopSettingLoaded}
-          className={`relative w-14 h-8 rounded-full transition-colors flex-shrink-0 disabled:opacity-50 ${shopOpen ? 'bg-[#16181d]' : 'bg-gray-300'}`}>
+          className={`relative w-14 h-8 rounded-full transition-colors flex-shrink-0 disabled:opacity-50 ${shopOpen ? 'bg-[#1f4d43]' : 'bg-gray-300'}`}>
           <span className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow transition-all ${shopOpen ? 'left-7' : 'left-1'}`} />
         </button>
       </div>
@@ -103,9 +103,9 @@ export default function Dashboard() {
           { label: "This Month", value: money(monthRev), sub: monthSales.length + ' sales', feature: false },
           { label: "All Time", value: money(allRev), sub: allSales.length + ' total', feature: false },
         ].map((c, i) => (
-          <div key={i} className={`rounded-2xl p-5 transition-shadow ${c.feature ? 'bg-[#0e7c86] text-white shadow-lg shadow-[#0e7c86]/20' : 'bg-white border border-gray-200 text-gray-900 shadow-sm hover:shadow-md'}`}>
+          <div key={i} className={`rounded-2xl p-5 transition-shadow ${c.feature ? 'bg-[#1f4d43] text-white shadow-lg shadow-[#1f4d43]/20' : 'bg-white border border-gray-200 text-gray-900 shadow-sm hover:shadow-md'}`}>
               <div className={`text-xs font-semibold uppercase tracking-wide ${c.feature ? 'text-white/75' : 'text-gray-500'}`}>{c.label}</div>
-              <div className={`text-[24px] md:text-[27px] font-bold mt-2 tracking-tight tabular-nums ${c.feature ? 'text-white' : 'text-gray-900'}`}>{c.value}</div>
+              <div className={`num-serif text-[26px] md:text-[30px] font-semibold mt-2.5 ${c.feature ? 'text-white' : 'text-[#1a2420]'}`}>{c.value}</div>
               <div className={`text-[11px] font-medium mt-1 ${c.feature ? 'text-white/60' : 'text-gray-400'}`}>{c.sub}</div>
           </div>
         ))}
@@ -116,43 +116,43 @@ export default function Dashboard() {
         {[
           { label: "Today's Profit", value: money(todayProfit), color: 'text-gray-900' },
           { label: 'Net Today', value: money(todayProfit - todayExp), color: todayProfit - todayExp >= 0 ? 'text-gray-900' : 'text-red-500' },
-          { label: 'Profit Margin', value: profitMargin + '%', color: Number(profitMargin) >= 30 ? 'text-[#0e7c86]' : Number(profitMargin) >= 15 ? 'text-amber-500' : 'text-red-500' },
+          { label: 'Profit Margin', value: profitMargin + '%', color: Number(profitMargin) >= 30 ? 'text-[#1f4d43]' : Number(profitMargin) >= 15 ? 'text-amber-500' : 'text-red-500' },
           { label: 'Stock Value', value: money(stockValue), color: 'text-gray-900' },
         ].map((s, i) => (
           <div key={i} className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
               <div className="text-[11px] text-gray-500 font-semibold uppercase tracking-wide">{s.label}</div>
-              <div className={`text-[20px] font-bold mt-1.5 tracking-tight tabular-nums ${s.color}`}>{s.value}</div>
+              <div className={`num-serif text-[22px] font-semibold mt-1.5 ${s.color}`}>{s.value}</div>
           </div>
         ))}
       </div>
 
       {/* Payment Split */}
-      <div className="bg-white rounded-2xl p-5 border border-gray-200/70 mb-5">
-        <h3 className="text-sm font-bold text-gray-800 mb-4">Payment Split (This Month)</h3>
-        <div className="space-y-3">
+      <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm mb-5">
+        <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-4">Payment Split · This Month</h3>
+        <div className="space-y-3.5">
           {[
-            { label: 'Cash', amount: monthCash, color: 'bg-[#0e7c86]', pct: monthRev ? (monthCash / monthRev * 100) : 0 },
-            { label: 'Momo', amount: monthMomo, color: 'bg-[#5bb3b9]', pct: monthRev ? (monthMomo / monthRev * 100) : 0 },
-            { label: 'Split', amount: monthSplit, color: 'bg-[#b3dcdf]', pct: monthRev ? (monthSplit / monthRev * 100) : 0 },
+            { label: 'Cash', amount: monthCash, color: 'bg-[#1f4d43]', pct: monthRev ? (monthCash / monthRev * 100) : 0 },
+            { label: 'Momo', amount: monthMomo, color: 'bg-[#6b8a80]', pct: monthRev ? (monthMomo / monthRev * 100) : 0 },
+            { label: 'Split', amount: monthSplit, color: 'bg-[#c2d3cd]', pct: monthRev ? (monthSplit / monthRev * 100) : 0 },
           ].map((p, i) => (
             <div key={i}>
-              <div className="flex justify-between text-xs mb-1">
+              <div className="flex justify-between text-xs mb-1.5">
                 <span className="font-semibold text-gray-600">{p.label}</span>
-                <span className="font-bold text-gray-800">{money(p.amount)} ({p.pct.toFixed(0)}%)</span>
+                <span className="font-semibold text-gray-800 num-serif">{money(p.amount)} <span className="text-gray-400 font-sans">({p.pct.toFixed(0)}%)</span></span>
               </div>
               <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div className={`h-full rounded-full ${p.color}`} style={{ width: Math.max(1, p.pct) + '%' }} />
+                <div className={`h-full rounded-full ${p.color} transition-all`} style={{ width: Math.max(1, p.pct) + '%' }} />
               </div>
             </div>
           ))}
         </div>
-        <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between text-xs">
-          <span className="text-gray-400">Month Expenses</span>
-          <span className="font-bold text-red-500">{money(monthExp)}</span>
+        <div className="mt-5 pt-4 border-t border-gray-100 flex justify-between items-center text-sm">
+          <span className="text-gray-500">Month Expenses</span>
+          <span className="font-semibold text-red-500 num-serif">{money(monthExp)}</span>
         </div>
-        <div className="flex justify-between text-xs mt-1">
-          <span className="text-gray-400">Net Profit</span>
-          <span className={`font-bold ${monthProfit - monthExp >= 0 ? 'text-[#0e7c86]' : 'text-red-500'}`}>{money(monthProfit - monthExp)}</span>
+        <div className="flex justify-between items-center text-sm mt-2">
+          <span className="text-gray-500">Net Profit</span>
+          <span className={`font-semibold num-serif text-[17px] ${monthProfit - monthExp >= 0 ? 'text-[#1f4d43]' : 'text-red-500'}`}>{money(monthProfit - monthExp)}</span>
         </div>
       </div>
     </div>

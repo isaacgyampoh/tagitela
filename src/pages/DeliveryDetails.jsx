@@ -54,7 +54,7 @@ export default function DeliveryDetails() {
 
   if (order === null) return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-      <Logo height={64} color="#16181d" accent="#9a9da3" className="mb-6" />
+      <Logo height={64} color="#1a2420" accent="#9a9da3" className="mb-6" />
       <h1 className="text-xl font-bold text-gray-900 mb-2">Order not found</h1>
       <p className="text-gray-500 text-sm">Please check the link, or contact us on 054 073 2878.</p>
     </div>
@@ -62,7 +62,7 @@ export default function DeliveryDetails() {
 
   if (done) return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-      <div className="w-16 h-16 rounded-full bg-[#0e7c86] flex items-center justify-center mb-5">
+      <div className="w-16 h-16 rounded-full bg-[#1f4d43] flex items-center justify-center mb-5">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
       </div>
       <h1 className="text-2xl font-bold text-gray-900 mb-2">Delivery details saved!</h1>
@@ -80,7 +80,7 @@ export default function DeliveryDetails() {
     <div className="min-h-screen py-8 px-5">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-6">
-          <Logo height={56} color="#16181d" accent="#9a9da3" className="mb-4 mx-auto" />
+          <Logo height={56} color="#1a2420" accent="#9a9da3" className="mb-4 mx-auto" />
           <h1 className="text-xl font-bold text-gray-900">Delivery Details</h1>
           <p className="text-gray-500 text-sm mt-1">Order {order.order_no} · {money(order.total)}</p>
         </div>
@@ -88,26 +88,26 @@ export default function DeliveryDetails() {
         <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">Full Name *</label>
-            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Your full name" className="w-full h-12 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-base focus:outline-none focus:border-[#0e7c86]" />
+            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Your full name" className="w-full h-12 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-base focus:outline-none focus:border-[#1f4d43]" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">Phone Number *</label>
-            <input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} inputMode="tel" placeholder="024 000 0000" className="w-full h-12 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-base focus:outline-none focus:border-[#0e7c86]" />
+            <input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} inputMode="tel" placeholder="024 000 0000" className="w-full h-12 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-base focus:outline-none focus:border-[#1f4d43]" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">Delivery Address *</label>
-            <textarea value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} rows={3} placeholder="House number, street, area, town/city" className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-base focus:outline-none focus:border-[#0e7c86] resize-none" />
+            <textarea value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} rows={3} placeholder="House number, street, area, town/city" className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-base focus:outline-none focus:border-[#1f4d43] resize-none" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">Nearest Landmark</label>
-            <input value={form.landmark} onChange={e => setForm({ ...form, landmark: e.target.value })} placeholder="e.g. near the blue church" className="w-full h-12 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-base focus:outline-none focus:border-[#0e7c86]" />
+            <input value={form.landmark} onChange={e => setForm({ ...form, landmark: e.target.value })} placeholder="e.g. near the blue church" className="w-full h-12 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-base focus:outline-none focus:border-[#1f4d43]" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">Delivery Notes</label>
-            <input value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Anything we should know" className="w-full h-12 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-base focus:outline-none focus:border-[#0e7c86]" />
+            <input value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Anything we should know" className="w-full h-12 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-base focus:outline-none focus:border-[#1f4d43]" />
           </div>
 
-          <button onClick={save} disabled={saving || !form.name.trim() || !form.address.trim()} className="w-full h-13 bg-[#0e7c86] text-white rounded-xl font-bold text-base disabled:opacity-40 mt-2">
+          <button onClick={save} disabled={saving || !form.name.trim() || !form.address.trim()} className="w-full h-13 bg-[#1f4d43] text-white rounded-xl font-bold text-base disabled:opacity-40 mt-2">
             {saving ? 'Saving...' : 'Save Delivery Details'}
           </button>
           <p className="text-center text-xs text-gray-400">Remember to dial your payment code to complete your order.</p>
