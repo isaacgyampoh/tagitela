@@ -14,8 +14,8 @@ const DOC_TYPES = [
 ]
 
 const emptyDoc = () => ({
-  id: '', doc_type: 'invoice', customer_name: '', customer_phone: '', customer_address: '',
-  items: [{ name: '', qty: 1, unit_price: 0 }], discount: 0, tax: 0, note: '', terms: '',
+  id: '', doc_type: 'invoice', customer_id: '', customer_name: '', customer_phone: '', customer_address: '',
+  is_credit: false, items: [{ name: '', qty: 1, unit_price: 0 }], discount: 0, tax: 0, note: '', terms: '',
   issue_date: today(), due_date: '', amount_paid: 0,
 })
 
@@ -24,17 +24,24 @@ export default function DocumentsPage() {
   const sb = getSupabase()
   const [tab, setTab] = useState('invoice')
   const [docs, setDocs] = useState([])
+  const [customers, setCustomers] = useState([])
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState(false)
   const [form, setForm] = useState(emptyDoc())
   const [saving, setSaving] = useState(false)
   const [prodQuery, setProdQuery] = useState('')
   const [activeItemIdx, setActiveItemIdx] = useState(null)
+  const [custQuery, setCustQuery] = useState('')
+  const [showCustList, setShowCustList] = useState(false)
 
   const load = async () => {
     setLoading(true)
-    const { data } = await sb.from('documents').select('*').order('created_at', { ascending: false }).limit(200)
-    setDocs(data || [])
+    const [d, c] = await Promise.all([
+      sb.from('documents').select('*').order('created_at', { ascending: false }).limit(200),
+      sb.from('customers').select('*').order('name', { ascending: true }).limit(500),
+    ])
+    setDocs(d.data || [])
+    setCustomers(c.data || [])
     setLoading(false)
   }
   useEffect(() => { load() }, []) // eslint-disable-line
@@ -48,7 +55,7 @@ export default function DocumentsPage() {
   const openNew = (type) => { setForm({ ...emptyDoc(), doc_type: type }); setModal(true) }
   const openEdit = (d) => {
     setForm({
-      id: d.id, doc_type: d.doc_type, customer_name: d.customer_name, customer_phone: d.customer_phone,
+      id: d.id, doc_type: d.doc_type, customer_id: d.customer_id || '', is_credit: d.is_credit || false, customer_name: d.customer_name, customer_phone: d.customer_phone,
       customer_address: d.customer_address, items: (typeof d.items === 'string' ? JSON.parse(d.items) : d.items) || [{ name: '', qty: 1, unit_price: 0 }],
       discount: d.discount, tax: d.tax, note: d.note, terms: d.terms, issue_date: d.issue_date, due_date: d.due_date || '', amount_paid: d.amount_paid,
     })
@@ -76,12 +83,17 @@ export default function DocumentsPage() {
     const tot = Math.max(0, sub - num(form.discount) + num(form.tax))
 
     const payload = {
-      doc_type: form.doc_type, customer_name: form.customer_name.trim(), customer_phone: form.customer_phone.trim(),
+      doc_type: form.doc_type, customer_id: form.customer_id || null,
+      customer_name: form.customer_name.trim(), customer_phone: form.customer_phone.trim(),
       customer_address: form.customer_address.trim(), items: JSON.stringify(items), subtotal: sub, discount: num(form.discount),
       tax: num(form.tax), total: tot, amount_paid: form.doc_type === 'receipt' ? (num(form.amount_paid) || tot) : num(form.amount_paid),
       note: form.note.trim(), terms: form.terms.trim(), issue_date: form.issue_date || today(), due_date: form.due_date || null,
       created_by: user?.name || '', updated_at: new Date().toISOString(),
     }
+
+    // Credit invoice: mark it, set the outstanding balance, unpaid.
+    const isCreditInvoice = form.doc_type === 'invoice' && form.is_credit && form.customer_id
+    if (isCreditInvoice) { payload.is_credit = true; payload.balance_due = tot; payload.pay_status = 'unpaid' }
 
     let saved
     if (form.id) {
@@ -89,12 +101,19 @@ export default function DocumentsPage() {
       if (error) { toast.error('Save failed: ' + error.message); setSaving(false); return }
       saved = data
     } else {
-      // Get next number for this type
       const { data: noData, error: noErr } = await sb.rpc('next_doc_no', { p_type: form.doc_type })
       if (noErr) { toast.error('Numbering failed — run the documents SQL setup'); setSaving(false); return }
       const { data, error } = await sb.from('documents').insert({ ...payload, doc_no: noData, status: form.doc_type === 'receipt' ? 'paid' : 'draft' }).select().single()
       if (error) { toast.error('Save failed: ' + error.message); setSaving(false); return }
       saved = data
+      // Post the debit to the customer's ledger for a NEW credit invoice.
+      if (isCreditInvoice) {
+        const { error: ledErr } = await sb.rpc('post_ledger', {
+          p_customer_id: form.customer_id, p_ref_type: 'invoice', p_ref_no: noData, p_ref_id: saved.id,
+          p_description: 'Invoice ' + noData, p_debit: tot, p_credit: 0, p_by: user?.name || '',
+        })
+        if (ledErr) toast('Invoice saved, but ledger posting failed — check credit setup', { icon: '⚠️' })
+      }
     }
     setSaving(false); setModal(false); toast.success('Saved ' + saved.doc_no)
     load()
@@ -182,6 +201,34 @@ export default function DocumentsPage() {
                   {DOC_TYPES.map(t => (
                     <button key={t.key} onClick={() => setForm({ ...form, doc_type: t.key })} className={`p-2 rounded-lg text-[11px] font-semibold border-2 ${form.doc_type === t.key ? 'border-gray-900 bg-gray-50' : 'border-gray-200 text-gray-500'}`}>{t.label}</button>
                   ))}
+                </div>
+              )}
+
+              {/* Customer picker (for invoices — enables credit + ledger) */}
+              {form.doc_type === 'invoice' && (
+                <div className="relative">
+                  <label className="block text-[11px] font-semibold text-gray-500 mb-1">Link a customer account (for credit sales)</label>
+                  <input className="w-full h-11 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-sm" placeholder="Search customer by name/phone…"
+                    value={custQuery || (form.customer_id ? form.customer_name : '')}
+                    onChange={e => { setCustQuery(e.target.value); setShowCustList(true); setForm({ ...form, customer_id: '' }) }}
+                    onFocus={() => setShowCustList(true)} />
+                  {showCustList && custQuery.trim() && (
+                    <div className="absolute z-30 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-52 overflow-y-auto">
+                      {customers.filter(c => (c.name || '').toLowerCase().includes(custQuery.toLowerCase()) || (c.phone || '').includes(custQuery)).slice(0, 8).map(c => (
+                        <button key={c.id} onClick={() => { setForm({ ...form, customer_id: c.id, customer_name: c.name || '', customer_phone: c.phone || '', customer_address: c.address || '' }); setCustQuery(''); setShowCustList(false) }} className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm flex justify-between">
+                          <span>{c.name || c.phone}</span>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${c.customer_type === 'credit' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'}`}>{c.customer_type === 'credit' ? 'CREDIT' : 'CASH'}</span>
+                        </button>
+                      ))}
+                      {customers.filter(c => (c.name || '').toLowerCase().includes(custQuery.toLowerCase()) || (c.phone || '').includes(custQuery)).length === 0 && <div className="px-3 py-3 text-xs text-gray-400">No match. Add them in Customers first, or leave blank for a walk-in.</div>}
+                    </div>
+                  )}
+                  {form.customer_id && (
+                    <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                      <input type="checkbox" checked={form.is_credit} onChange={e => setForm({ ...form, is_credit: e.target.checked })} className="w-4 h-4" />
+                      <span className="text-sm text-gray-700">This is a <b>credit sale</b> (adds to customer's account balance)</span>
+                    </label>
+                  )}
                 </div>
               )}
 
