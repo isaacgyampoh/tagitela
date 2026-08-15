@@ -52,7 +52,7 @@ const PAGE_PERMISSIONS = {
 }
 
 export default function App() {
-  const { user, page, setPage, loading, loadAll, logout, isAdmin, can, darkMode } = useStore()
+  const { user, page, setPage, loading, loadAll, logout, isAdmin, can } = useStore()
   const [cartOpen, setCartOpen] = useState(false)
   const [receipt, setReceipt] = useState(null)
   const [lastActivity, setLastActivity] = useState(Date.now())
@@ -87,8 +87,8 @@ export default function App() {
 
   // Apply dark mode
   useEffect(() => {
-    document.body.classList.toggle('dark', darkMode)
-  }, [darkMode])
+    document.body.classList.remove('dark')
+  }, [])
 
   useEffect(() => { loadAll(); setupRealtime() }, [])
 
@@ -253,7 +253,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <Toaster position="top-center" toastOptions={{ duration: 2000, style: { borderRadius: '14px', padding: '12px 20px', fontWeight: 600, fontSize: '13px', background: darkMode ? '#222' : '#fff', color: darkMode ? '#eee' : '#1a1a1a' } }} />
+      <Toaster position="top-center" toastOptions={{ duration: 2000, style: { borderRadius: '14px', padding: '12px 20px', fontWeight: 600, fontSize: '13px', background: '#fff', color: '#1a1a1a' } }} />
       <Navigation onOpenCart={() => setCartOpen(true)} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} onReceipt={setReceipt} />
       {receipt && <ReceiptPreview sale={receipt} onClose={() => setReceipt(null)} />}

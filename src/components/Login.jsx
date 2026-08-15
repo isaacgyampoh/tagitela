@@ -47,7 +47,7 @@ export default function Login() {
   const filled = pins.filter(p => p).length
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-[#f6f6f5] px-6">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-[#f1f3f6] px-6">
       <div className="w-full max-w-[380px] text-center">
 
         {/* Logo */}
@@ -76,8 +76,8 @@ export default function Login() {
                   value={v}
                   className="w-16 h-16 rounded-2xl text-center border-2 focus:outline-none transition-all duration-200"
                   style={{
-                    borderColor: v ? '#16181d' : i === filled ? '#8fb39e' : '#dde2dc',
-                    background: v ? '#16181d' : '#fafafa',
+                    borderColor: v ? '#0e7c86' : i === filled ? '#0e7c86' : '#d5dae1',
+                    background: v ? '#0e7c86' : '#ffffff',
                     color: 'transparent',
                     caretColor: 'transparent',
                   }}

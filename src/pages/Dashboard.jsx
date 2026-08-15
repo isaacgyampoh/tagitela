@@ -95,7 +95,7 @@ export default function Dashboard() {
       {/* Alerts */}
 
 
-      {/* Revenue Cards — Cleara style: light, airy, one teal feature card */}
+      {/* Revenue Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-3.5">
         {[
           { label: "Today", value: money(todayRev), sub: todaySales.length + ' sales', feature: true },
@@ -103,10 +103,10 @@ export default function Dashboard() {
           { label: "This Month", value: money(monthRev), sub: monthSales.length + ' sales', feature: false },
           { label: "All Time", value: money(allRev), sub: allSales.length + ' total', feature: false },
         ].map((c, i) => (
-          <div key={i} className={`rounded-2xl p-5 ${c.feature ? 'bg-[#0e7c86] text-white' : 'bg-white border border-gray-200/70 text-gray-900'}`}>
-              <div className={`text-xs font-medium ${c.feature ? 'text-white/70' : 'text-gray-400'}`}>{c.label}</div>
-              <div className="text-[24px] md:text-[26px] font-bold mt-2 tracking-tight">{c.value}</div>
-              <div className={`text-[11px] font-medium mt-1 ${c.feature ? 'text-white/50' : 'text-gray-400'}`}>{c.sub}</div>
+          <div key={i} className={`rounded-2xl p-5 transition-shadow ${c.feature ? 'bg-[#0e7c86] text-white shadow-lg shadow-[#0e7c86]/20' : 'bg-white border border-gray-200 text-gray-900 shadow-sm hover:shadow-md'}`}>
+              <div className={`text-xs font-semibold uppercase tracking-wide ${c.feature ? 'text-white/75' : 'text-gray-500'}`}>{c.label}</div>
+              <div className={`text-[24px] md:text-[27px] font-bold mt-2 tracking-tight tabular-nums ${c.feature ? 'text-white' : 'text-gray-900'}`}>{c.value}</div>
+              <div className={`text-[11px] font-medium mt-1 ${c.feature ? 'text-white/60' : 'text-gray-400'}`}>{c.sub}</div>
           </div>
         ))}
       </div>
@@ -119,9 +119,9 @@ export default function Dashboard() {
           { label: 'Profit Margin', value: profitMargin + '%', color: Number(profitMargin) >= 30 ? 'text-[#0e7c86]' : Number(profitMargin) >= 15 ? 'text-amber-500' : 'text-red-500' },
           { label: 'Stock Value', value: money(stockValue), color: 'text-gray-900' },
         ].map((s, i) => (
-          <div key={i} className="bg-white rounded-2xl p-4 border border-gray-200/70">
-              <div className="text-[11px] text-gray-400 font-medium">{s.label}</div>
-              <div className={`text-[20px] font-bold mt-1 tracking-tight ${s.color}`}>{s.value}</div>
+          <div key={i} className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+              <div className="text-[11px] text-gray-500 font-semibold uppercase tracking-wide">{s.label}</div>
+              <div className={`text-[20px] font-bold mt-1.5 tracking-tight tabular-nums ${s.color}`}>{s.value}</div>
           </div>
         ))}
       </div>

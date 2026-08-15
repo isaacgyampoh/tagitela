@@ -85,7 +85,7 @@ export default function Navigation({ onOpenCart }) {
   const onLeave = () => { if (pinned) return; clearTimeout(hoverTimer.current); hoverTimer.current = setTimeout(() => setHovering(false), 180) }
   const togglePin = () => { const nx = !pinned; setPinned(nx); setHovering(false); try { localStorage.setItem('sidebar-pinned', nx ? '1' : '0') } catch {} }
   const [mobileOpen, setMobileOpen] = useState(false)
-  const { page, setPage, user, isAdmin, can, logout, waOrders, cart, darkMode, toggleDark, shopOpen, shopSettingLoaded, fetchShopOpen, setShopOpen } = useStore()
+  const { page, setPage, user, isAdmin, can, logout, waOrders, cart, shopOpen, shopSettingLoaded, fetchShopOpen, setShopOpen } = useStore()
   useEffect(() => { if (isAdmin) fetchShopOpen() }, [isAdmin])
   // Content offset follows the PINNED width only. On hover-expand the sidebar
   // overlays the content (no layout shift / flicker); pinned open pushes content.
@@ -171,10 +171,7 @@ export default function Navigation({ onOpenCart }) {
           <span className="flex-shrink-0 w-5 flex justify-center"><I d="M3 9l1-5h16l1 5M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M3 9h18" /></span>
           {expanded && <span className="flex-1 flex items-center justify-between text-[13px]"><span>Online Shop</span><span className={`relative w-9 h-5 rounded-full transition-colors ${shopOpen ? 'bg-green-500' : 'bg-white/20'}`}><span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${shopOpen ? 'left-[18px]' : 'left-0.5'}`} /></span></span>}
         </button>}
-        {isAdmin && <button onClick={toggleDark} className="w-full flex items-center gap-3 h-9 px-3 rounded-lg text-white/45 hover:bg-white/8 hover:text-white transition">
-          <span className="flex-shrink-0 w-5 flex justify-center">{darkMode ? <I d="M12 3v1m0 16v1m9-9h-1M4 12H3m3.34-5.66l-.7-.7m12.73 0l-.71.7M6.34 17.66l-.7.7m12.73 0l-.71-.7M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" /> : <I d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />}</span>
-          {expanded && <span className="text-[13px]">{darkMode ? 'Light mode' : 'Dark mode'}</span>}
-        </button>}
+
         <div className="flex items-center gap-3 h-11 px-3 mt-1 border-t border-white/5 pt-2">
           <div className="w-7 h-7 bg-white/10 rounded-lg flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">{user?.name?.charAt(0)}</div>
           {expanded && <div className="flex-1 overflow-hidden"><div className="text-[13px] font-medium text-white truncate">{user?.name}</div><div className="text-[10px] text-white/40">{isAdmin ? 'Administrator' : 'Staff'}</div></div>}
@@ -248,10 +245,7 @@ export default function Navigation({ onOpenCart }) {
             <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${shopOpen ? 'left-[18px]' : 'left-0.5'}`} />
           </span>
         </button>}
-        {isAdmin && <button onClick={toggleDark} className="w-full py-3 bg-stone-100 rounded-xl text-sm font-semibold flex items-center justify-center gap-2">
-          {darkMode ? <I d="M12 3v1m0 16v1m9-9h-1M4 12H3m3.34-5.66l-.7-.7m12.73 0l-.71.7M6.34 17.66l-.7.7m12.73 0l-.71-.7M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" /> : <I d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />}
-          {darkMode ? 'Light Mode' : 'Dark Mode'}
-        </button>}
+
         <button onClick={() => { logout(); setMobileOpen(false) }} className="w-full py-3 bg-red-50 rounded-xl text-sm font-semibold text-red-500">Sign Out</button>
       </div>
     </div>
