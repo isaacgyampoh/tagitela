@@ -1,5 +1,5 @@
 // ============================================================
-// EVERYTINROOM — WhatsApp AI Sales Agent
+// TAGITELA — WhatsApp AI Sales Agent
 // Receives WaSender webhooks, thinks with OpenAI (human-like sales rep),
 // looks up real inventory, creates orders, and replies via WaSender.
 // Fully automatic; flags the owner only when needed.
@@ -13,14 +13,14 @@ const OPENAI_KEY = Deno.env.get('OPENAI_API_KEY') || ''
 const WASENDER_KEY = Deno.env.get('WASENDER_API_KEY') || ''
 const OWNER_PHONE = Deno.env.get('OWNER_PHONE') || '233549207471'  // owner alerts (054 920 7471)
 
-const SHOP = 'EVERYTINROOM'
+const SHOP = 'TAGITELA'
 const SHOP_PHONE = '054 920 7471'
 const USSD_PREFIX = '*920*141*'   // NaloPay USSD; order code appended
 
 // Shop location (fill in real values). If SHOP_LAT/LNG are set, the agent sends
 // a native WhatsApp location pin; it always sends the Maps link + plain address.
 const SHOP_ADDRESS = Deno.env.get('SHOP_ADDRESS') || 'Aviation Road J382, Adenta, Accra'
-const SHOP_MAPS_LINK = Deno.env.get('SHOP_MAPS_LINK') || 'https://maps.google.com/?q=Everytinroom+Adenta+Aviation+Road+Accra+Ghana'
+const SHOP_MAPS_LINK = Deno.env.get('SHOP_MAPS_LINK') || ''
 const SHOP_LAT = parseFloat(Deno.env.get('SHOP_LAT') || '5.7089')
 const SHOP_LNG = parseFloat(Deno.env.get('SHOP_LNG') || '-0.1553')
 

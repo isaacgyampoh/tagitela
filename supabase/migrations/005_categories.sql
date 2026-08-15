@@ -1,12 +1,12 @@
 -- ============================================
--- EVERYTINROOM POS - STANDARDIZE CATEGORIES
+-- TAGITELA - STANDARDIZE CATEGORIES
 -- Run this in Supabase SQL Editor
 -- ============================================
 
 -- This updates product categories to the standard set.
 -- Only run if you want to clean up existing category names.
 
--- Standard Categories for Everytin Room:
+-- Standard Categories for TAGITELA:
 -- 1. Curtains
 -- 2. Kitchenware
 -- 3. Cookware Sets

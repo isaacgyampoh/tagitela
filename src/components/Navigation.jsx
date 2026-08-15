@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useStore } from '../hooks/useStore'
 import { LogoMark } from './Logo'
 import { getRegisterId, openCustomerScreenManual } from '../hooks/useCustomerDisplay'
@@ -73,14 +73,24 @@ const MOB = [
 const AP = ['dash','products','bundles','staff','expenses','reports','customers','performance','promos','invoices','stocktakes','restock','stockadjustments','documents']
 
 export default function Navigation({ onOpenCart }) {
-  const [expanded, setExpanded] = useState(() => { try { return localStorage.getItem('sidebar-collapsed') !== '1' } catch { return true } })
+  const [pinned, setPinned] = useState(() => { try { return localStorage.getItem('sidebar-pinned') === '1' } catch { return false } })
+  const [hovering, setHovering] = useState(false)
+  const hoverTimer = useRef(null)
+  const expanded = pinned || hovering  // expanded when pinned open, or hovered
+
+  // Debounced hover: small delay in and out so accidental cursor movement
+  // near the edge doesn't cause flicker.
+  const onEnter = () => { if (pinned) return; clearTimeout(hoverTimer.current); hoverTimer.current = setTimeout(() => setHovering(true), 90) }
+  const onLeave = () => { if (pinned) return; clearTimeout(hoverTimer.current); hoverTimer.current = setTimeout(() => setHovering(false), 180) }
+  const togglePin = () => { const nx = !pinned; setPinned(nx); setHovering(false); try { localStorage.setItem('sidebar-pinned', nx ? '1' : '0') } catch {} }
   const [mobileOpen, setMobileOpen] = useState(false)
   const { page, setPage, user, isAdmin, can, logout, waOrders, cart, darkMode, toggleDark, shopOpen, shopSettingLoaded, fetchShopOpen, setShopOpen } = useStore()
   useEffect(() => { if (isAdmin) fetchShopOpen() }, [isAdmin])
-  // Expose the sidebar width so the main content can offset correctly.
+  // Content offset follows the PINNED width only. On hover-expand the sidebar
+  // overlays the content (no layout shift / flicker); pinned open pushes content.
   useEffect(() => {
-    document.documentElement.style.setProperty('--sidebar-w', (expanded ? 236 : 68) + 'px')
-  }, [expanded])
+    document.documentElement.style.setProperty('--sidebar-w', (pinned ? 236 : 68) + 'px')
+  }, [pinned])
   const toggleShop = async () => {
     const next = !shopOpen
     const res = await setShopOpen(next)
@@ -113,16 +123,17 @@ export default function Navigation({ onOpenCart }) {
 
   return (<>
     {/* Desktop Sidebar — solid, structured, enterprise */}
-    <aside className="hidden md:flex fixed top-0 left-0 bottom-0 z-[100] flex-col bg-[#0f1115] border-r border-black/20 transition-all duration-200"
+    <aside className={`hidden md:flex fixed top-0 left-0 bottom-0 z-[100] flex-col bg-[#0f1115] border-r border-black/20 transition-[width] duration-200 ease-out ${expanded && !pinned ? 'shadow-2xl shadow-black/40' : ''}`}
+      onMouseEnter={onEnter} onMouseLeave={onLeave}
       style={{ width: expanded ? 236 : 68 }}>
 
       {/* Brand + collapse toggle */}
       <div className="flex items-center gap-3 px-4 h-16 flex-shrink-0 border-b border-white/5">
         <LogoMark size={30} rounded={8} />
         {expanded && <div className="font-heading text-[14px] font-bold tracking-tight text-white whitespace-nowrap flex-1">TAGITELA</div>}
-        <button onClick={() => { const nx = !expanded; setExpanded(nx); try { localStorage.setItem('sidebar-collapsed', nx ? '0' : '1') } catch {} }} className="text-white/40 hover:text-white/80 transition flex-shrink-0">
-          <I d={expanded ? "M11 17l-5-5 5-5M18 17l-5-5 5-5" : "M13 17l5-5-5-5M6 17l5-5-5-5"} width="16" height="16" />
-        </button>
+        {expanded && <button onClick={togglePin} title={pinned ? 'Unpin sidebar' : 'Pin sidebar open'} className={`transition flex-shrink-0 ${pinned ? 'text-white' : 'text-white/40 hover:text-white/80'}`}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill={pinned ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 17v5M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+        </button>}
       </div>
 
       {/* Nav groups */}

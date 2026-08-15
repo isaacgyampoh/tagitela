@@ -1,5 +1,5 @@
 -- ============================================================================
--- EVERYTINROOM POS — FULL SUPABASE SCHEMA
+-- TAGITELA — FULL SUPABASE SCHEMA
 -- Run this ONCE in: Supabase Dashboard → SQL Editor → New Query → Run
 -- ============================================================================
 

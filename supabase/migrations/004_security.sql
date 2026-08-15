@@ -1,5 +1,5 @@
 -- ============================================
--- EVERYTINROOM POS - SECURITY HARDENING
+-- TAGITELA - SECURITY HARDENING
 -- Run this in Supabase SQL Editor
 -- https://supabase.com/dashboard/project/nyrjuuynklrmyzgsgmwm/sql
 -- ============================================

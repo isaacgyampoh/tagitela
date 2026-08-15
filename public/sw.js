@@ -1,4 +1,4 @@
-const CACHE_NAME = 'everytinroom-v2'
+const CACHE_NAME = 'tagitela-v1'
 
 self.addEventListener('install', (e) => {
   self.skipWaiting()
