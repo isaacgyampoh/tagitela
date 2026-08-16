@@ -4,19 +4,18 @@
 
 * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 html, body, #root { min-height: 100vh; min-height: 100dvh; }
-body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 15px; background: #f4f5f3; color: #1a2420; letter-spacing: -0.011em; transition: background .2s ease, color .2s ease; }
-/* Display serif — Fraunces — carries the brand personality on headings + the wordmark. */
-h1, h2, h3, h4, h5, h6 { font-family: 'Inter', -apple-system, system-ui, sans-serif; letter-spacing: -0.022em; font-weight: 700; }
-.font-display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; letter-spacing: -0.01em; }
-/* Serif numerals for financial figures — money should feel considered. */
-.num-serif { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 15px; background: #f7f8fa; color: #0f172a; letter-spacing: -0.011em; transition: background .2s ease, color .2s ease; }
+h1, h2, h3, h4, h5, h6 { font-family: 'Inter', -apple-system, system-ui, sans-serif; letter-spacing: -0.025em; font-weight: 700; }
+/* Display + numerals now clean sans (no serif) with tight tracking for a modern, confident feel. */
+.font-display { font-family: 'Inter', -apple-system, system-ui, sans-serif; letter-spacing: -0.03em; font-weight: 700; }
+.num-serif { font-family: 'Inter', -apple-system, system-ui, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; font-weight: 700; }
 :root {
-  --ink: #1a2420;          /* near-black with a green cast */
-  --pine: #1f4d43;         /* deep pine — primary brand */
-  --pine-600: #2a5f54;
-  --sage: #6b8a80;         /* muted secondary */
-  --paper: #f4f5f3;        /* warm off-white bg */
-  --line: rgba(26,36,32,.08);
+  --ink: #0f172a;          /* slate-900 */
+  --pine: #2563eb;         /* primary blue */
+  --pine-600: #1d4ed8;
+  --sage: #64748b;         /* slate-500 secondary */
+  --paper: #f7f8fa;
+  --line: rgba(15,23,42,.08);
 }
 /* Fill correctly in fullscreen/kiosk and on mobile browsers (handles the address bar). */
 .fill-screen { height: 100vh; height: 100dvh; }
@@ -140,7 +139,7 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Inter', -apple-system, system-ui, sans-se
 /* Segmented control track in dark */
 
 /* ---- Sidebar active pill: white bg needs dark text (both modes) ---- */
-/* .text-[#16211d] is already near-black; it sits on a white pill so it's fine
+/* .text-[#0f172a] is already near-black; it sits on a white pill so it's fine
    in both themes — no override needed. */
 
 /* ---- Table header contrast ---- */

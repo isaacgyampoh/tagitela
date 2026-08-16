@@ -209,7 +209,7 @@ export default function RestockPage() {
             <button
               onClick={handleRestock}
               disabled={saving || totalItems === 0}
-              className="w-full h-14 bg-[#1a2420] hover:bg-[#2a2d34] disabled:bg-gray-300 text-white rounded-2xl text-base font-bold active:scale-[0.98] transition flex items-center justify-center gap-2"
+              className="w-full h-14 bg-[#0f172a] hover:bg-[#2a2d34] disabled:bg-gray-300 text-white rounded-2xl text-base font-bold active:scale-[0.98] transition flex items-center justify-center gap-2"
             >
               {saving ? (
                 <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Updating...</>

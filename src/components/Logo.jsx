@@ -6,8 +6,8 @@
  *   <LogoMark />  compact "T" monogram for square slots.
  */
 
-const INK = '#1a2420'
-const GOLD = '#1f4d43'
+const INK = '#0f172a'
+const GOLD = '#2563eb'
 
 let _id = 0
 const uid = () => `arc${++_id}`
@@ -26,7 +26,7 @@ export function Logo({ height = 96, color = INK, accent = GOLD, tagline = false,
   return (
     <svg className={className} height={height} viewBox={`0 0 ${W} ${H}`} fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TAGITELA">
       <defs><path id={id} d={arcPath} /></defs>
-      <text fill={color} fontFamily="'Fraunces', Georgia, serif" fontWeight="600" fontSize="40" letterSpacing="1" style={{ fontOpticalSizing: 'auto' }}>
+      <text fill={color} fontFamily="'Inter', system-ui, sans-serif" fontWeight="700" fontSize="40" letterSpacing="-1" style={{ fontOpticalSizing: 'auto' }}>
         <textPath href={`#${id}`} startOffset="50%" textAnchor="middle">TAGITELA</textPath>
       </text>
       <line x1={cx - 80} y1={ruleY} x2={cx - 14} y2={ruleY} stroke={accent} strokeWidth="1.4" />
@@ -48,7 +48,7 @@ export function LogoFlat({ height = 44, color = INK, accent = GOLD, tagline = fa
   return (
     <svg className={className} height={height} viewBox={`0 0 ${W} ${H}`} fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TAGITELA">
       <text x={cx} y={tagline ? 38 : 44} textAnchor="middle" fill={color}
-        fontFamily="'Fraunces', Georgia, serif" fontWeight="600" fontSize="38" letterSpacing="1"
+        fontFamily="'Inter', system-ui, sans-serif" fontWeight="700" fontSize="38" letterSpacing="-1"
         style={{ fontOpticalSizing: 'auto' }}>TAGITELA</text>
       <line x1={cx - 78} y1={ruleY} x2={cx - 14} y2={ruleY} stroke={accent} strokeWidth="1.4" />
       <rect x={cx - 3.5} y={ruleY - 3.5} width="7" height="7" fill={accent} transform={`rotate(45 ${cx} ${ruleY})`} />
@@ -61,12 +61,12 @@ export function LogoFlat({ height = 44, color = INK, accent = GOLD, tagline = fa
   )
 }
 
-export function LogoMark({ size = 40, bg = '#1f4d43', fg = '#ffffff', accent = GOLD, rounded = 12, className = '' }) {
+export function LogoMark({ size = 40, bg = '#2563eb', fg = '#ffffff', accent = GOLD, rounded = 12, className = '' }) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TAGITELA">
       <rect width="48" height="48" rx={rounded} fill={bg} />
       <text x="24" y="33" textAnchor="middle" fill={fg}
-        fontFamily="'Fraunces', Georgia, serif" fontWeight="600" fontSize="26"
+        fontFamily="'Inter', system-ui, sans-serif" fontWeight="700" fontSize="26"
         style={{ fontOpticalSizing: 'auto' }}>T</text>
       <line x1="17" y1="37" x2="31" y2="37" stroke={accent} strokeWidth="1.6" />
     </svg>

@@ -311,15 +311,15 @@ export default function WhatsAppOrders() {
   const statusColor = (s) => {
     const sc = s?.toLowerCase()
     if (sc === 'paid') return 'bg-[#33363d] text-white'
-    if (sc === 'completed') return 'bg-[#1a2420] text-white'
+    if (sc === 'completed') return 'bg-[#0f172a] text-white'
     if (sc === 'cancelled') return 'bg-[#c0492f] text-white'
-    return 'bg-[#1a2420] text-white'
+    return 'bg-[#0f172a] text-white'
   }
 
   const deliveryColor = (s) => {
     if (s === 'Delivered') return 'bg-[#33363d] text-white'
     if (s === 'Picked Up') return 'bg-[#33363d] text-white'
-    if (s === 'Out for Delivery') return 'bg-[#1a2420] text-white'
+    if (s === 'Out for Delivery') return 'bg-[#0f172a] text-white'
     if (s === 'Packaged') return 'bg-[#5e6b62] text-white'
     return 'bg-[#dde2dc] text-[#5e6b62]'
   }
@@ -370,7 +370,7 @@ export default function WhatsAppOrders() {
           { k: 'needs-address', label: 'Needs address' },
         ].map(f => (
           <button key={f.k} onClick={() => setSrcFilter(f.k)}
-            className={`h-8 px-4 rounded-full text-xs font-semibold whitespace-nowrap transition ${srcFilter === f.k ? (f.k === 'needs-address' ? 'bg-amber-500 text-white' : 'bg-[#1f4d43] text-white') : 'bg-white text-stone-400'}`}>
+            className={`h-8 px-4 rounded-full text-xs font-semibold whitespace-nowrap transition ${srcFilter === f.k ? (f.k === 'needs-address' ? 'bg-amber-500 text-white' : 'bg-[#2563eb] text-white') : 'bg-white text-stone-400'}`}>
             {f.label}
           </button>
         ))}
@@ -392,7 +392,7 @@ export default function WhatsAppOrders() {
                   <div className="text-sm font-bold flex items-center gap-2">
                     {order.customerName || 'Customer'}
                     {order.source === 'web' && <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-blue-600">WEB</span>}
-                    {order.source === 'whatsapp' && <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#1f4d43]/10 text-[#1f4d43]">WHATSAPP</span>}
+                    {order.source === 'whatsapp' && <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#2563eb]/10 text-[#2563eb]">WHATSAPP</span>}
                     {order.source === 'walkin' && <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-stone-100 text-stone-500">WALK-IN</span>}
                     {order.source === 'whatsapp' && !order.detailsFilled && !order.address && <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-600">NO ADDRESS</span>}
                   </div>

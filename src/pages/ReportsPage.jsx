@@ -124,7 +124,7 @@ export default function ReportsPage() {
           const blob = new Blob([csv], { type: 'text/csv' })
           const url = URL.createObjectURL(blob)
           const a = document.createElement('a'); a.href = url; a.download = `tagitela-report-${tab}-${today()}.csv`; a.click()
-        }} className="h-10 px-4 bg-[#1a2420] text-white rounded-xl text-sm font-semibold hover:bg-[#2a2d34] active:scale-[.97] transition">
+        }} className="h-10 px-4 bg-[#0f172a] text-white rounded-xl text-sm font-semibold hover:bg-[#2a2d34] active:scale-[.97] transition">
           Export CSV
         </button>
       </div>

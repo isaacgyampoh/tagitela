@@ -124,14 +124,14 @@ export default function Navigation({ onOpenCart }) {
 
   return (<>
     {/* Desktop Sidebar — solid, structured, enterprise */}
-    <aside className={`hidden md:flex fixed top-0 left-0 bottom-0 z-[100] flex-col bg-[#16211d] border-r border-black/20 transition-[width] duration-200 ease-out ${expanded && !pinned ? 'shadow-2xl shadow-black/40' : ''}`}
+    <aside className={`hidden md:flex fixed top-0 left-0 bottom-0 z-[100] flex-col bg-[#0f172a] border-r border-black/20 transition-[width] duration-200 ease-out ${expanded && !pinned ? 'shadow-2xl shadow-black/40' : ''}`}
       onMouseEnter={onEnter} onMouseLeave={onLeave}
       style={{ width: expanded ? 236 : 68 }}>
 
       {/* Brand + collapse toggle */}
       <div className="flex items-center gap-3 px-4 h-16 flex-shrink-0 border-b border-white/5">
         <LogoMark size={30} rounded={8} />
-        {expanded && <div className="font-display text-[17px] font-semibold tracking-tight text-white whitespace-nowrap flex-1">Tagitela</div>}
+        {expanded && <div className="text-[15px] font-bold tracking-tight text-white whitespace-nowrap flex-1">TAGITELA</div>}
         {expanded && <button onClick={togglePin} title={pinned ? 'Unpin sidebar' : 'Pin sidebar open'} className={`transition flex-shrink-0 ${pinned ? 'text-white' : 'text-white/40 hover:text-white/80'}`}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill={pinned ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 17v5M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
         </button>}
@@ -147,11 +147,11 @@ export default function Navigation({ onOpenCart }) {
                 const active = page === n.id
                 return (
                   <button key={n.id} onClick={() => go(n.id)}
-                    className={`w-full flex items-center gap-3 h-10 px-3 rounded-lg transition-colors relative group ${active ? 'bg-white text-[#16211d] font-semibold' : 'text-white/55 hover:bg-white/8 hover:text-white'}`}>
+                    className={`w-full flex items-center gap-3 h-10 px-3 rounded-lg transition-colors relative group ${active ? 'bg-white text-[#0f172a] font-semibold' : 'text-white/55 hover:bg-white/8 hover:text-white'}`}>
                     <span className="flex-shrink-0 w-5 flex justify-center">{icons[n.id] || <I d="M12 12h.01" />}</span>
                     {expanded && <span className="text-[13px] whitespace-nowrap overflow-hidden flex-1 text-left">{n.label}</span>}
                     {n.wa && wa > 0 && <span className={`${expanded ? 'ml-auto' : 'absolute top-1 right-1'} min-w-[18px] h-[18px] px-1 bg-red-500 rounded-full text-[9px] font-bold text-white flex items-center justify-center`}>{wa}</span>}
-                    {!expanded && <div className="absolute left-full ml-2 px-2.5 py-1 bg-[#16211d] border border-white/10 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">{n.label}</div>}
+                    {!expanded && <div className="absolute left-full ml-2 px-2.5 py-1 bg-[#0f172a] border border-white/10 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">{n.label}</div>}
                   </button>
                 )
               })}
@@ -165,7 +165,7 @@ export default function Navigation({ onOpenCart }) {
         <button onClick={openCustomerScreen} className="w-full flex items-center gap-3 h-9 px-3 rounded-lg text-white/45 hover:bg-white/8 hover:text-white transition group relative">
           <span className="flex-shrink-0 w-5 flex justify-center"><I d="M2 3h20v14H2zM8 21h8M12 17v4" /></span>
           {expanded && <span className="text-[13px]">Customer Screen</span>}
-          {!expanded && <div className="absolute left-full ml-2 px-2.5 py-1 bg-[#16211d] border border-white/10 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">Customer Screen</div>}
+          {!expanded && <div className="absolute left-full ml-2 px-2.5 py-1 bg-[#0f172a] border border-white/10 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">Customer Screen</div>}
         </button>
         {isAdmin && <button onClick={toggleShop} disabled={!shopSettingLoaded} className="w-full flex items-center gap-3 h-9 px-3 rounded-lg text-white/45 hover:bg-white/8 hover:text-white transition disabled:opacity-40">
           <span className="flex-shrink-0 w-5 flex justify-center"><I d="M3 9l1-5h16l1 5M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M3 9h18" /></span>
@@ -182,7 +182,7 @@ export default function Navigation({ onOpenCart }) {
     </aside>
 
     {/* Cart FAB */}
-    {page === 'pos' && <button onClick={onOpenCart} className="fixed bottom-[calc(90px+env(safe-area-inset-bottom))] md:bottom-6 right-4 md:right-6 w-14 h-14 bg-[#1a2420] rounded-2xl flex items-center justify-center text-white z-[99] shadow-lg shadow-[#1a2420]/30 active:scale-90 transition hover:bg-[#2a2d34]"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>{cc>0&&<span className="absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] bg-white text-[#1a2420] rounded-full text-[11px] font-bold flex items-center justify-center shadow-md">{cc}</span>}</button>}
+    {page === 'pos' && <button onClick={onOpenCart} className="fixed bottom-[calc(90px+env(safe-area-inset-bottom))] md:bottom-6 right-4 md:right-6 w-14 h-14 bg-[#0f172a] rounded-2xl flex items-center justify-center text-white z-[99] shadow-lg shadow-[#0f172a]/30 active:scale-90 transition hover:bg-[#2a2d34]"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>{cc>0&&<span className="absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] bg-white text-[#0f172a] rounded-full text-[11px] font-bold flex items-center justify-center shadow-md">{cc}</span>}</button>}
 
     {/* Mobile Header */}
     <header className="flex md:hidden fixed top-0 left-0 right-0 h-14 safe-top glass px-4 items-center gap-2 z-[100] border-b border-stone-200/30">
@@ -241,7 +241,7 @@ export default function Navigation({ onOpenCart }) {
       <div className="p-3 safe-bottom space-y-2 border-t border-stone-100">
         {isAdmin && <button onClick={toggleShop} disabled={!shopSettingLoaded} className="w-full py-3 bg-stone-100 rounded-xl text-sm font-semibold flex items-center justify-between px-4 disabled:opacity-50">
           <span className="flex items-center gap-2"><I d="M3 9l1-5h16l1 5M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M3 9h18" /> Online Shop {shopOpen ? 'Open' : 'Closed'}</span>
-          <span className={`relative w-10 h-6 rounded-full transition-colors flex-shrink-0 ${shopOpen ? 'bg-[#1a2420]' : 'bg-stone-300'}`}>
+          <span className={`relative w-10 h-6 rounded-full transition-colors flex-shrink-0 ${shopOpen ? 'bg-[#0f172a]' : 'bg-stone-300'}`}>
             <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${shopOpen ? 'left-[18px]' : 'left-0.5'}`} />
           </span>
         </button>}
