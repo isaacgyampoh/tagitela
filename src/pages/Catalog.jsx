@@ -15,7 +15,7 @@ const thumb = (url, w = 500) => {
   if (url.includes('supabase')) return url + (url.includes('?') ? '&' : '?') + `width=${w}&quality=80`
   return url
 }
-const WA = '233245315581'
+const WA = '233540732878'  // TAGITELA WhatsApp (054 073 2878)
 
 export default function Catalog() {
   const [products, setProducts] = useState([])
@@ -61,18 +61,39 @@ export default function Catalog() {
   const upd = (id, d) => setCart(prev => prev.map(c => { if (c.id !== id) return c; const n = Math.max(0, c.qty + d); if (!n) return { ...c, qty: 0 }; const iw = c.wp > 0 && c.wm > 0 && n >= c.wm; return { ...c, qty: n, price: iw ? c.wp : c.rp, isW: iw } }).filter(c => c.qty > 0))
   const cc = cart.reduce((a, c) => a + c.qty, 0), ct = cart.reduce((a, c) => a + c.price * c.qty, 0)
 
-  const order = () => {
-    if (!cart.length) return
-    const lines = ['Hi, I would like to order the following from TAGITELA:', '']
-    cart.forEach(c => lines.push(`- ${c.qty}x ${c.name}`))
-    lines.push('', 'Your invoice will be sent to you shortly. Thank you.')
+  const [ordering, setOrdering] = useState(false)
+  const order = async () => {
+    if (!cart.length || ordering) return
+    setOrdering(true)
+    const sb = getSupabase()
+    const items = cart.map(c => ({ id: c.id, name: c.name, qty: c.qty, price: c.price, line_total: c.price * c.qty }))
+    const subtotal = items.reduce((a, i) => a + i.line_total, 0)
+    // Save the order first so nothing is lost even if they never send the message.
+    let orderNo = ''
+    try {
+      const { data } = await sb.rpc('next_order_no')
+      orderNo = data || ('WA-' + Date.now().toString().slice(-6))
+    } catch { orderNo = 'WA-' + Date.now().toString().slice(-6) }
+    try {
+      await sb.from('whatsapp_orders').insert({
+        order_no: orderNo, date: new Date().toISOString(), items: JSON.stringify(items),
+        subtotal, total: subtotal, status: 'Pending', source: 'website', details_filled: false,
+      })
+    } catch (e) { /* still let them message us */ }
+
+    const lines = [`Hi TAGITELA, I'd like to order (Ref ${orderNo}):`, '']
+    cart.forEach(c => lines.push(`- ${c.qty}x ${c.name}  —  ${money(c.price * c.qty)}`))
+    lines.push('', `Total: ${money(subtotal)}`, '', 'Please confirm availability and delivery. Thank you.')
     const msg = lines.join('\n')
+    try { navigator.clipboard.writeText(msg) } catch {}
     if (/Android|iPhone|iPad/i.test(navigator.userAgent)) window.location.href = `whatsapp://send?phone=${WA}&text=${encodeURIComponent(msg)}`
     else window.open(`https://web.whatsapp.com/send?phone=${WA}&text=${encodeURIComponent(msg)}`, '_blank')
-    try { navigator.clipboard.writeText(msg) } catch {}
+    setCart([]); setShowCart(false); setOrdering(false)
+    setToast('Order sent! We saved it — check WhatsApp to confirm.')
+    setTimeout(() => setToast(''), 4000)
   }
 
-  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center" style={{ colorScheme: 'light' }}><div className="w-7 h-7 border-[2.5px] border-stone-200 border-t-green-700 rounded-full animate-spin" /></div>
+  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center" style={{ colorScheme: 'light' }}><div className="w-7 h-7 border-[2.5px] border-stone-200 border-t-blue-600 rounded-full animate-spin" /></div>
 
   return (
     <div className="min-h-screen bg-white catalog-light" style={{ fontFamily: "'Inter', sans-serif", colorScheme: 'light', color: '#111827' }}>
@@ -95,23 +116,23 @@ export default function Catalog() {
           <span className="text-base font-bold tracking-tight text-stone-900">TAGITELA</span>
           <a href={`tel:${SHOP.phone.split('/')[0].trim().replace(/\s/g, '')}`} className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-full px-4 py-2 hover:bg-gray-100 transition">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#166534" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            <span className="text-xs font-semibold text-green-800">{SHOP.phone.split('/')[0].trim()}</span>
+            <span className="text-xs font-semibold text-blue-700">{SHOP.phone.split('/')[0].trim()}</span>
           </a>
         </div>
       </nav>
 
       {/* Hero */}
-      <div className="bg-green-900 relative overflow-hidden cat-hero">
+      <div className="bg-[#0f172a] relative overflow-hidden cat-hero">
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 relative z-10">
-          <a href={SHOP.mapsUrl} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 text-green-400 text-xs font-semibold tracking-[0.2em] uppercase mb-3 hover:text-green-300 transition">
+          <a href={SHOP.mapsUrl} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 text-blue-400 text-xs font-semibold tracking-[0.2em] uppercase mb-3 hover:text-blue-300 transition">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
             {SHOP.address}
           </a>
-          <h1 className="text-white text-3xl md:text-5xl font-bold leading-tight mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>Home essentials,<br />delivered to you.</h1>
-          <p className="text-green-300/60 text-sm md:text-base max-w-md mb-6">Quality cookware, curtains, bedding and more. Nationwide delivery across Ghana.</p>
+          <h1 className="text-white text-3xl md:text-5xl font-extrabold leading-[1.05] tracking-[-0.03em] mb-3">Your trusted<br />medical supplier.</h1>
+          <p className="text-blue-200/60 text-sm md:text-base max-w-md mb-6">Quality medical supplies, pharmaceuticals and equipment. Nationwide delivery across Ghana.</p>
           <div className="relative max-w-lg">
             <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="What are you looking for?" className="w-full h-12 pl-11 pr-10 bg-white/10 border border-white/10 rounded-xl text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-green-400/40 focus:bg-white/15 transition" />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="What are you looking for?" className="w-full h-12 pl-11 pr-10 bg-white/10 border border-white/10 rounded-xl text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-blue-400/40 focus:bg-white/15 transition" />
             {search && <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white/15 rounded-full text-white/60 text-[10px] flex items-center justify-center">✕</button>}
           </div>
         </div>
@@ -154,7 +175,7 @@ export default function Catalog() {
                 <span className={`text-sm font-bold ${promo ? 'text-red-600' : 'text-stone-900'}`}>{money(dp)}</span>
               </div>
               {!promo && hw && <p className="text-[10px] text-green-600 font-medium mt-0.5">Buy {p.wholesale_min_qty}+ for {money(p.wholesale_price)} each</p>}
-              <button onClick={e => { e.stopPropagation(); add({ ...p, price: dp }) }} className="w-full h-9 mt-2.5 bg-stone-900 hover:bg-gray-900 text-white rounded-xl text-xs font-semibold transition-colors">Add to Order</button>
+              <button onClick={e => { e.stopPropagation(); add({ ...p, price: dp }) }} className="w-full h-9 mt-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl text-xs font-semibold transition-colors">Add to Order</button>
             </div>
           })}
         </div>
@@ -165,11 +186,11 @@ export default function Catalog() {
           <h2 className="text-2xl md:text-3xl font-bold text-center text-stone-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>Got Questions?</h2>
           <p className="text-2xl md:text-3xl font-bold text-center text-stone-900 mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>We've Got Answers.</p>
           {[
-            ['How do I place an order?', 'Browse our products and tap "Add to Order" on the items you want. Tap the cart button and click "Order on WhatsApp" — this opens our official WhatsApp number where you send your order. An invoice will be sent to you immediately. Click on your invoice to fill in your delivery details and make payment. We then package and deliver your order.'],
-            ['What payment methods do you accept?', 'We accept Mobile Money (MTN, Vodafone, AirtelTigo) and card payments. You will receive a secure payment link with your invoice.'],
+            ['How do I place an order?', 'Browse our products and tap "Add to Order". Open the cart and tap "Order on WhatsApp" — this opens our official WhatsApp with your order ready to send. We confirm availability, share payment details, and arrange delivery.'],
+            ['What payment methods do you accept?', 'We accept Mobile Money (MTN, Telecel, AirtelTigo) and bank transfer. Payment details are shared on WhatsApp when we confirm your order.'],
             ['Do you offer delivery?', 'Yes. We deliver nationwide across Ghana. Delivery fees depend on your location and will be communicated after your order is confirmed.'],
             ['Do you have wholesale prices?', 'Yes. Selected products have reduced prices when you buy in bulk. The wholesale price applies automatically when you reach the minimum quantity.'],
-          ].map(([q, a], i) => <div key={i} onClick={() => setFaq(faq === i ? null : i)} className={`mb-2 rounded-2xl cursor-pointer transition-all ${faq === i ? 'bg-gray-50 border border-green-100' : 'bg-stone-50 border border-transparent hover:bg-stone-100'}`}>
+          ].map(([q, a], i) => <div key={i} onClick={() => setFaq(faq === i ? null : i)} className={`mb-2 rounded-2xl cursor-pointer transition-all ${faq === i ? 'bg-gray-50 border border-blue-100' : 'bg-stone-50 border border-transparent hover:bg-stone-100'}`}>
             <div className="flex justify-between items-center px-5 py-4">
               <span className="text-sm font-semibold text-stone-900 pr-4">{q}</span>
               <span className={`text-lg text-stone-400 transition-transform ${faq === i ? 'rotate-45' : ''}`}>+</span>
@@ -238,9 +259,9 @@ export default function Catalog() {
         </div>
         {cart.length > 0 && <div className="p-5 border-t border-stone-100">
           <div className="flex justify-between items-center mb-4"><span className="text-sm text-stone-400">{cc} item{cc !== 1 ? 's' : ''}</span><span className="text-xl font-bold">{money(ct)}</span></div>
-          <button onClick={() => { order(); setShowCart(false); setCart([]) }} className="w-full h-14 bg-gray-900 hover:bg-gray-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2.5 transition-colors">
+          <button onClick={order} disabled={ordering} className="w-full h-14 bg-[#2563eb] hover:bg-[#1d4ed8] disabled:opacity-60 text-white rounded-2xl font-bold flex items-center justify-center gap-2.5 transition-colors">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.612-1.21A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-2.115 0-4.142-.588-5.904-1.699l-.424-.252-2.732.717.73-2.667-.276-.44A9.72 9.72 0 012.25 12C2.25 6.624 6.624 2.25 12 2.25S21.75 6.624 21.75 12 17.376 21.75 12 21.75z"/></svg>
-            Order on WhatsApp
+            {ordering ? 'Sending…' : 'Order on WhatsApp'}
           </button>
           <button onClick={() => setCart([])} className="w-full h-8 text-stone-400 text-xs mt-2">Clear</button>
         </div>}
@@ -285,7 +306,7 @@ export default function Catalog() {
               </div>
             </div>
             <div className="p-4 border-t border-stone-100">
-              <button onClick={() => { add({ ...view, price: dp }); close() }} className="w-full h-12 bg-stone-900 hover:bg-gray-900 text-white rounded-xl text-sm font-semibold transition-colors">Add to Order</button>
+              <button onClick={() => { add({ ...view, price: dp }); close() }} className="w-full h-12 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl text-sm font-semibold transition-colors">Add to Order</button>
             </div>
           </div>
         </>
