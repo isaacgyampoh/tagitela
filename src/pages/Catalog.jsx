@@ -15,7 +15,9 @@ const thumb = (url, w = 500) => {
   if (url.includes('supabase')) return url + (url.includes('?') ? '&' : '?') + `width=${w}&quality=80`
   return url
 }
-const WA = '233540732878'  // TAGITELA WhatsApp (054 073 2878)
+const WA = '233540732878'
+const BLUE = '#2563eb'
+const I = ({ d, s = 20, sw = 2, fill = 'none' }) => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">{d}</svg>
 
 export default function Catalog() {
   const [products, setProducts] = useState([])
@@ -28,13 +30,15 @@ export default function Catalog() {
   const [view, setView] = useState(null)
   const [toast, setToast] = useState('')
   const [faq, setFaq] = useState(null)
+  const [ordering, setOrdering] = useState(false)
 
   useEffect(() => { load(); loadPromos() }, [])
   useEffect(() => { if (!products.length) return; const m = window.location.hash.match(/\/catalog\/(.+)$/); if (m) { const p = products.find(x => x.id === m[1]); if (p) setView(p) } }, [products])
 
   const open = p => { setView(p); window.location.hash = `/catalog/${p.id}` }
   const close = () => { setView(null); window.location.hash = '/catalog' }
-  const share = p => { const l = `${window.location.origin}/#/catalog/${p.id}`; navigator.share ? navigator.share({ title: p.name, url: l }).catch(() => {}) : (navigator.clipboard?.writeText(l), setToast('Link copied')) }
+  const flash = (m) => { setToast(m); setTimeout(() => setToast(''), 1800) }
+  const share = p => { const l = `${window.location.origin}/#/catalog/${p.id}`; navigator.share ? navigator.share({ title: p.name, url: l }).catch(() => {}) : (navigator.clipboard?.writeText(l), flash('Link copied')) }
 
   const load = async () => {
     const cached = sessionStorage.getItem('cat_p'), ct = sessionStorage.getItem('cat_t')
@@ -56,31 +60,21 @@ export default function Catalog() {
 
   const add = product => {
     setCart(prev => { const ex = prev.find(c => c.id === product.id); if (ex) { const n = ex.qty + 1, wp = Number(product.wholesale_price || 0), wm = Number(product.wholesale_min_qty || 0); return prev.map(c => c.id === product.id ? { ...c, qty: n, price: (wp > 0 && wm > 0 && n >= wm) ? wp : Number(product.price), isW: wp > 0 && wm > 0 && n >= wm } : c) }; return [...prev, { id: product.id, name: product.name, price: Number(product.price), rp: Number(product.price), wp: Number(product.wholesale_price || 0), wm: Number(product.wholesale_min_qty || 0), qty: 1, img: product.image, isW: false }] })
-    setToast('Added'); setTimeout(() => setToast(''), 1500)
+    flash('Added to order')
   }
   const upd = (id, d) => setCart(prev => prev.map(c => { if (c.id !== id) return c; const n = Math.max(0, c.qty + d); if (!n) return { ...c, qty: 0 }; const iw = c.wp > 0 && c.wm > 0 && n >= c.wm; return { ...c, qty: n, price: iw ? c.wp : c.rp, isW: iw } }).filter(c => c.qty > 0))
   const cc = cart.reduce((a, c) => a + c.qty, 0), ct = cart.reduce((a, c) => a + c.price * c.qty, 0)
+  const dprice = p => promoMap[p.id]?.price || Number(p.price)
 
-  const [ordering, setOrdering] = useState(false)
   const order = async () => {
     if (!cart.length || ordering) return
     setOrdering(true)
     const sb = getSupabase()
     const items = cart.map(c => ({ id: c.id, name: c.name, qty: c.qty, price: c.price, line_total: c.price * c.qty }))
     const subtotal = items.reduce((a, i) => a + i.line_total, 0)
-    // Save the order first so nothing is lost even if they never send the message.
     let orderNo = ''
-    try {
-      const { data } = await sb.rpc('next_order_no')
-      orderNo = data || ('WA-' + Date.now().toString().slice(-6))
-    } catch { orderNo = 'WA-' + Date.now().toString().slice(-6) }
-    try {
-      await sb.from('whatsapp_orders').insert({
-        order_no: orderNo, date: new Date().toISOString(), items: JSON.stringify(items),
-        subtotal, total: subtotal, status: 'Pending', source: 'website', details_filled: false,
-      })
-    } catch (e) { /* still let them message us */ }
-
+    try { const { data } = await sb.rpc('next_order_no'); orderNo = data || ('WA-' + Date.now().toString().slice(-6)) } catch { orderNo = 'WA-' + Date.now().toString().slice(-6) }
+    try { await sb.from('whatsapp_orders').insert({ order_no: orderNo, date: new Date().toISOString(), items: JSON.stringify(items), subtotal, total: subtotal, status: 'Pending', source: 'website', details_filled: false }) } catch {}
     const lines = [`Hi TAGITELA, I'd like to order (Ref ${orderNo}):`, '']
     cart.forEach(c => lines.push(`- ${c.qty}x ${c.name}  —  ${money(c.price * c.qty)}`))
     lines.push('', `Total: ${money(subtotal)}`, '', 'Please confirm availability and delivery. Thank you.')
@@ -89,228 +83,203 @@ export default function Catalog() {
     if (/Android|iPhone|iPad/i.test(navigator.userAgent)) window.location.href = `whatsapp://send?phone=${WA}&text=${encodeURIComponent(msg)}`
     else window.open(`https://web.whatsapp.com/send?phone=${WA}&text=${encodeURIComponent(msg)}`, '_blank')
     setCart([]); setShowCart(false); setOrdering(false)
-    setToast('Order sent! We saved it — check WhatsApp to confirm.')
-    setTimeout(() => setToast(''), 4000)
+    flash('Order saved — check WhatsApp to confirm')
   }
 
-  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center" style={{ colorScheme: 'light' }}><div className="w-7 h-7 border-[2.5px] border-stone-200 border-t-blue-600 rounded-full animate-spin" /></div>
+  const phone1 = SHOP.phone.split('/')[0].trim()
+  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center" style={{ colorScheme: 'light' }}><div className="w-8 h-8 border-[3px] border-gray-200 border-t-[#2563eb] rounded-full animate-spin" /></div>
 
   return (
-    <div className="min-h-screen bg-white catalog-light" style={{ fontFamily: "'Inter', sans-serif", colorScheme: 'light', color: '#111827' }}>
-      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
-      <style>{`
-        .catalog-light, .catalog-light * { color-scheme: light !important; }
-        body.dark .catalog-light { background: #fff !important; color: #111827 !important; }
-        body.dark .catalog-light input { color: #fff !important; }
-        body.dark .catalog-light .cat-nav { background: rgba(255,255,255,0.92) !important; }
-        body.dark .catalog-light .cat-footer { background: #0c0a09 !important; }
-        body.dark .catalog-light .cat-hero { background: #14532d !important; }
-      `}</style>
+    <div className="min-h-screen bg-white text-gray-900" style={{ colorScheme: 'light' }}>
+      {toast && <div className="fixed top-5 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-5 py-2.5 rounded-full text-sm font-medium z-[700] shadow-xl">{toast}</div>}
 
-      {/* Toast */}
-      {toast && <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-5 py-2 rounded-full text-sm font-medium z-[500] shadow-lg">{toast}</div>}
-
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-stone-100 cat-nav">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <span className="text-base font-bold tracking-tight text-stone-900">TAGITELA</span>
-          <a href={`tel:${SHOP.phone.split('/')[0].trim().replace(/\s/g, '')}`} className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-full px-4 py-2 hover:bg-gray-100 transition">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#166534" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            <span className="text-xs font-semibold text-blue-700">{SHOP.phone.split('/')[0].trim()}</span>
-          </a>
+      <nav className="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-lg" style={{ background: BLUE }}>T</div>
+            <span className="text-[17px] font-extrabold tracking-tight">TAGITELA</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <a href={`tel:${phone1.replace(/\s/g, '')}`} className="hidden sm:flex items-center gap-2 text-gray-600 hover:text-gray-900 rounded-full px-3.5 py-2 text-sm font-semibold transition">
+              <I d={<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />} s={16} />
+              {phone1}
+            </a>
+            <button onClick={() => setShowCart(true)} className="relative flex items-center gap-2 text-white rounded-full px-4 py-2 text-sm font-semibold transition hover:opacity-90" style={{ background: BLUE }}>
+              <I d={<><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></>} s={16} />
+              <span className="hidden sm:inline">Cart</span>
+              {cc > 0 && <span className="min-w-[20px] h-5 px-1 bg-white text-[#2563eb] rounded-full text-[11px] font-bold flex items-center justify-center">{cc}</span>}
+            </button>
+          </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <div className="bg-[#0f172a] relative overflow-hidden cat-hero">
-        <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 relative z-10">
-          <a href={SHOP.mapsUrl} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 text-blue-400 text-xs font-semibold tracking-[0.2em] uppercase mb-3 hover:text-blue-300 transition">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            {SHOP.address}
-          </a>
-          <h1 className="text-white text-3xl md:text-5xl font-extrabold leading-[1.05] tracking-[-0.03em] mb-3">Your trusted<br />medical supplier.</h1>
-          <p className="text-blue-200/60 text-sm md:text-base max-w-md mb-6">Quality medical supplies, pharmaceuticals and equipment. Nationwide delivery across Ghana.</p>
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#0f172a 0%,#1e293b 55%,#1d3a8a 100%)' }}>
+        <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full opacity-20" style={{ background: 'radial-gradient(circle,#3b82f6,transparent 70%)' }} />
+        <div className="max-w-6xl mx-auto px-5 py-14 md:py-20 relative">
+          <div className="inline-flex items-center gap-2 text-blue-300 text-[11px] font-bold tracking-[0.18em] uppercase mb-4"><span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> Trusted medical supplier · Ghana</div>
+          <h1 className="text-white text-4xl md:text-6xl font-extrabold leading-[1.02] tracking-[-0.03em] mb-4 max-w-2xl">Quality medical supplies, delivered.</h1>
+          <p className="text-blue-100/70 text-base md:text-lg max-w-xl mb-8">Pharmaceuticals, surgical supplies, consumables and equipment — sourced with care and delivered nationwide.</p>
           <div className="relative max-w-lg">
-            <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="What are you looking for?" className="w-full h-12 pl-11 pr-10 bg-white/10 border border-white/10 rounded-xl text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-blue-400/40 focus:bg-white/15 transition" />
-            {search && <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white/15 rounded-full text-white/60 text-[10px] flex items-center justify-center">✕</button>}
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40"><I d={<><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></>} s={20} /></span>
+            <input value={search} onChange={e => { setSearch(e.target.value); if (e.target.value) document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' }) }} placeholder="Search products…" className="w-full h-14 pl-12 pr-4 bg-white/10 border border-white/15 rounded-2xl text-white text-[15px] placeholder:text-white/40 focus:outline-none focus:border-blue-400/50 focus:bg-white/15 transition" />
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Categories */}
-        <div className="flex gap-2 overflow-x-auto pb-3 mb-1 scrollbar-hide -mx-4 px-4">
-          {cats.map(c => <button key={c} onClick={() => setCat(c)} className={`h-8 px-4 rounded-full text-xs font-semibold whitespace-nowrap flex-shrink-0 transition ${cat === c ? 'bg-gray-900 text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'}`}>{c === 'all' ? 'All' : c}<span className="ml-1.5 opacity-50">{counts[c] || 0}</span></button>)}
-        </div>
-
-        {/* Promo row */}
-        {Object.keys(promoMap).length > 0 && <div className="my-5">
-          <div className="flex items-center gap-2 mb-3"><div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" /><span className="text-xs font-bold text-stone-800 uppercase tracking-wider">Promo</span></div>
-          <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
-            {products.filter(p => promoMap[p.id]).map(p => <div key={'p'+p.id} onClick={() => open(p)} className="flex-shrink-0 w-[140px] cursor-pointer group">
-              <div className="w-full h-24 bg-stone-100 rounded-xl overflow-hidden relative">{p.image ? <img src={thumb(p.image, 400)} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" /> : <div className="w-full h-full bg-stone-50" />}<div className="absolute top-1.5 left-1.5 bg-[#0f172a] text-white text-[8px] font-bold px-2 py-0.5 rounded">PROMO</div></div>
-              <p className="text-[11px] font-medium text-stone-700 mt-2 truncate">{p.name}</p>
-              <div className="flex items-center gap-1.5"><span className="text-[10px] text-stone-400 line-through">{money(p.price)}</span><span className="text-xs font-bold text-red-600">{money(promoMap[p.id].price)}</span></div>
-            </div>)}
-          </div>
-        </div>}
-
-        {/* Count */}
-        <p className="text-[11px] text-stone-400 font-medium mb-4 mt-2">{filtered.length} product{filtered.length !== 1 ? 's' : ''}</p>
-
-        {/* Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-          {filtered.map(p => {
-            const promo = promoMap[p.id], dp = promo ? promo.price : p.price, hw = Number(p.wholesale_price||0) > 0 && Number(p.wholesale_min_qty||0) > 0
-            return <div key={p.id} className="group cursor-pointer" onClick={() => open(p)}>
-              <div className="w-full aspect-square bg-stone-100 rounded-2xl overflow-hidden relative mb-2.5">
-                {p.image ? <img src={thumb(p.image)} alt={p.name} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" loading="lazy" /> : <div className="w-full h-full bg-stone-50" />}
-                {promo && <div className="absolute top-2 left-2 bg-[#0f172a] text-white text-[9px] font-bold px-2 py-1 rounded-lg">PROMO</div>}
-              </div>
-              <p className="text-xs text-stone-400 mb-0.5">{p.category}</p>
-              <p className="text-sm font-semibold text-stone-900 leading-snug mb-1 line-clamp-2">{p.name}</p>
-              <div className="flex items-center gap-2">
-                {promo && <span className="text-xs text-stone-400 line-through">{money(p.price)}</span>}
-                <span className={`text-sm font-bold ${promo ? 'text-red-600' : 'text-stone-900'}`}>{money(dp)}</span>
-              </div>
-              {!promo && hw && <p className="text-[10px] text-green-600 font-medium mt-0.5">Buy {p.wholesale_min_qty}+ for {money(p.wholesale_price)} each</p>}
-              <button onClick={e => { e.stopPropagation(); add({ ...p, price: dp }) }} className="w-full h-9 mt-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl text-xs font-semibold transition-colors">Add to Order</button>
-            </div>
-          })}
-        </div>
-        {filtered.length === 0 && <div className="text-center py-20"><p className="text-stone-400 text-sm">Nothing found</p>{search && <button onClick={() => setSearch('')} className="mt-2 text-green-600 text-sm font-medium">Clear search</button>}</div>}
-
-        {/* FAQ */}
-        <div className="mt-16 mb-10 max-w-2xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-stone-900 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>Got Questions?</h2>
-          <p className="text-2xl md:text-3xl font-bold text-center text-stone-900 mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>We've Got Answers.</p>
+      <div className="border-b border-gray-100 bg-gray-50/60">
+        <div className="max-w-6xl mx-auto px-5 py-4 grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            ['How do I place an order?', 'Browse our products and tap "Add to Order". Open the cart and tap "Order on WhatsApp" — this opens our official WhatsApp with your order ready to send. We confirm availability, share payment details, and arrange delivery.'],
-            ['What payment methods do you accept?', 'We accept Mobile Money (MTN, Telecel, AirtelTigo) and bank transfer. Payment details are shared on WhatsApp when we confirm your order.'],
-            ['Do you offer delivery?', 'Yes. We deliver nationwide across Ghana. Delivery fees depend on your location and will be communicated after your order is confirmed.'],
-            ['Do you have wholesale prices?', 'Yes. Selected products have reduced prices when you buy in bulk. The wholesale price applies automatically when you reach the minimum quantity.'],
-          ].map(([q, a], i) => <div key={i} onClick={() => setFaq(faq === i ? null : i)} className={`mb-2 rounded-2xl cursor-pointer transition-all ${faq === i ? 'bg-gray-50 border border-blue-100' : 'bg-stone-50 border border-transparent hover:bg-stone-100'}`}>
-            <div className="flex justify-between items-center px-5 py-4">
-              <span className="text-sm font-semibold text-stone-900 pr-4">{q}</span>
-              <span className={`text-lg text-stone-400 transition-transform ${faq === i ? 'rotate-45' : ''}`}>+</span>
+            [<><path d="M20 6 9 17l-5-5" /></>, 'Genuine products', 'From trusted suppliers'],
+            [<><rect x="1" y="3" width="15" height="13" /><path d="M16 8h4l3 3v5h-7V8z" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></>, 'Nationwide delivery', 'Fast dispatch in Ghana'],
+            [<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />, 'Order on WhatsApp', 'Simple, personal service'],
+            [<><path d="M12 2 2 7l10 5 10-5-10-5z" /><path d="m2 17 10 5 10-5M2 12l10 5 10-5" /></>, 'Bulk & wholesale', 'Better prices on quantity'],
+          ].map(([ic, t, s], i) => (
+            <div key={i} className="flex items-start gap-3">
+              <span className="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-[#2563eb] flex-shrink-0"><I d={ic} s={18} /></span>
+              <div><div className="text-[13px] font-bold text-gray-900 leading-tight">{t}</div><div className="text-[11px] text-gray-500 mt-0.5">{s}</div></div>
             </div>
-            {faq === i && <p className="px-5 pb-4 text-sm text-stone-500 leading-relaxed -mt-1">{a}</p>}
-          </div>)}
+          ))}
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-stone-950 text-white cat-footer">
-        <div className="max-w-6xl mx-auto px-4 py-10">
-          <div className="flex flex-wrap gap-10 mb-8">
-            <div className="flex-1 min-w-[200px]">
-              <h3 className="text-lg font-bold mb-2 text-white">TAGITELA</h3>
-              <p className="text-xs text-stone-500 leading-relaxed max-w-xs">Quality home furnishings — cookware, curtains, bedding, kitchenware and more. Nationwide delivery across Ghana.</p>
+      <div id="shop" className="max-w-6xl mx-auto px-5 py-10">
+        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-hide -mx-1 px-1">
+          {cats.map(c => <button key={c} onClick={() => setCat(c)} className={`h-9 px-4 rounded-full text-[13px] font-semibold whitespace-nowrap flex-shrink-0 transition border ${cat === c ? 'text-white border-transparent' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`} style={cat === c ? { background: BLUE } : {}}>{c === 'all' ? 'All Products' : c}<span className="ml-1.5 opacity-60">{counts[c] || 0}</span></button>)}
+        </div>
+        <div className="flex items-baseline justify-between mb-5">
+          <h2 className="text-xl font-extrabold tracking-tight">{cat === 'all' ? 'All Products' : cat}</h2>
+          <span className="text-sm text-gray-400">{filtered.length} item{filtered.length !== 1 ? 's' : ''}</span>
+        </div>
+        {filtered.length === 0 ? (
+          <div className="text-center py-20 text-gray-400"><p className="text-sm">No products found{search ? ` for "${search}"` : ''}.</p></div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filtered.map(p => {
+              const promo = promoMap[p.id], dp = dprice(p)
+              return (
+                <div key={p.id} className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg hover:border-gray-300 transition-all">
+                  <div className="relative aspect-square bg-gray-50 overflow-hidden cursor-pointer" onClick={() => open(p)}>
+                    {p.image ? <img src={thumb(p.image, 500)} alt={p.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300" /> : <div className="w-full h-full flex items-center justify-center text-gray-300"><I d={<path d="M3 9l1-5h16l1 5M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M3 9h18" />} s={40} /></div>}
+                    {promo && <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">OFFER</span>}
+                    {p.wholesale_price > 0 && p.wholesale_min_qty > 0 && <span className="absolute top-2 right-2 bg-white/90 text-gray-700 text-[10px] font-bold px-2 py-1 rounded-full">Bulk deal</span>}
+                  </div>
+                  <div className="p-3.5">
+                    {p.category && <div className="text-[10px] font-bold text-[#2563eb] uppercase tracking-wide mb-1">{p.category}</div>}
+                    <p className="text-[13px] font-semibold text-gray-900 leading-snug mb-2 line-clamp-2 min-h-[2.4em] cursor-pointer" onClick={() => open(p)}>{p.name}</p>
+                    <div className="flex items-baseline gap-1.5 mb-2.5"><span className="text-[15px] font-extrabold text-gray-900">{money(dp)}</span>{promo && <span className="text-xs text-gray-400 line-through">{money(p.price)}</span>}</div>
+                    <button onClick={() => add({ ...p, price: dp })} className="w-full h-9 text-white rounded-xl text-xs font-bold transition hover:opacity-90" style={{ background: BLUE }}>Add to Order</button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      <div className="bg-gray-50 border-y border-gray-100">
+        <div className="max-w-6xl mx-auto px-5 py-12">
+          <h2 className="text-2xl font-extrabold tracking-tight text-center mb-2">Why choose TAGITELA</h2>
+          <p className="text-gray-500 text-sm text-center mb-8 max-w-md mx-auto">Serving clinics, pharmacies and individuals with dependable medical supply.</p>
+          <div className="grid md:grid-cols-3 gap-5">
+            {[['Reliable stock', 'We keep the supplies you need in stock, with fast restocking and honest availability.'], ['Fair pricing', 'Competitive retail prices and real wholesale rates for bulk and institutional buyers.'], ['Personal service', 'Order and get support directly on WhatsApp — no call centres, no runaround.']].map(([t, d], i) => (
+              <div key={i} className="bg-white border border-gray-200 rounded-2xl p-6">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold mb-4" style={{ background: BLUE }}>{i + 1}</div>
+                <h3 className="font-bold text-gray-900 mb-1.5">{t}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-2xl mx-auto px-5 py-12">
+        <h2 className="text-2xl font-extrabold tracking-tight text-center mb-8">Frequently asked</h2>
+        {[
+          ['How do I place an order?', 'Browse our products and tap "Add to Order". Open the cart and tap "Order on WhatsApp" — this opens our official WhatsApp with your order ready to send. We confirm availability, share payment details, and arrange delivery.'],
+          ['What payment methods do you accept?', 'We accept Mobile Money (MTN, Telecel, AirtelTigo) and bank transfer. Payment details are shared on WhatsApp when we confirm your order.'],
+          ['Do you offer delivery?', 'Yes. We deliver nationwide across Ghana. Delivery fees depend on your location and are confirmed after your order.'],
+          ['Do you sell wholesale?', 'Yes. Many products have bulk pricing that applies automatically when you add enough quantity. For large institutional orders, message us on WhatsApp.'],
+        ].map(([q, a], i) => (
+          <div key={i} onClick={() => setFaq(faq === i ? null : i)} className={`mb-2.5 rounded-2xl cursor-pointer transition-all border ${faq === i ? 'bg-blue-50/50 border-blue-100' : 'bg-white border-gray-200 hover:border-gray-300'}`}>
+            <div className="flex items-center justify-between px-5 py-4"><span className="text-sm font-semibold text-gray-900 pr-4">{q}</span><span className={`text-xl text-gray-400 transition-transform flex-shrink-0 ${faq === i ? 'rotate-45' : ''}`}>+</span></div>
+            {faq === i && <p className="px-5 pb-4 text-sm text-gray-500 leading-relaxed -mt-1">{a}</p>}
+          </div>
+        ))}
+      </div>
+
+      <footer className="bg-[#0f172a] text-white">
+        <div className="max-w-6xl mx-auto px-5 py-12">
+          <div className="grid md:grid-cols-3 gap-8 mb-10">
+            <div>
+              <div className="flex items-center gap-2.5 mb-3"><div className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-lg" style={{ background: BLUE }}>T</div><span className="text-[17px] font-extrabold">TAGITELA</span></div>
+              <p className="text-sm text-white/50 leading-relaxed max-w-xs">Your trusted partner for quality medical supplies, delivered nationwide across Ghana.</p>
             </div>
             <div>
-              <h4 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider mb-3">Contact</h4>
-              <div className="flex flex-col gap-2 text-xs text-stone-400">
-                <a href={`tel:${SHOP.phone.split('/')[0].trim().replace(/\s/g, '')}`} className="hover:text-white transition">{SHOP.phone}</a>
-                <a href={SHOP.mapsUrl} target="_blank" rel="noopener" className="hover:text-white transition flex items-center gap-1.5">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  {SHOP.addressFull}
-                </a>
-                <p className="text-stone-600 text-[10px]">Yango / Bolt / Uber: {SHOP.yango}</p>
-              </div>
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-white/40 mb-3">Contact</h4>
+              <ul className="space-y-2 text-sm text-white/70">
+                <li><a href={`tel:${phone1.replace(/\s/g, '')}`} className="hover:text-white transition">{SHOP.phone}</a></li>
+                {SHOP.address && <li>{SHOP.address}</li>}
+                {SHOP.mapsUrl && <li><a href={SHOP.mapsUrl} target="_blank" rel="noopener" className="text-blue-400 hover:text-blue-300 transition">View on map →</a></li>}
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-white/40 mb-3">Order</h4>
+              <a href={`https://wa.me/${WA}`} target="_blank" rel="noopener" className="inline-flex items-center gap-2 text-white rounded-xl px-4 py-2.5 text-sm font-semibold transition hover:opacity-90" style={{ background: BLUE }}>
+                <I d={<path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.6.1-.2.3-.7 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.2-.5.1-.2 0-.4 0-.5s-.6-1.5-.9-2c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.3-1 .9-1 2.3s1 2.7 1.1 2.9c.1.2 2 3.1 4.9 4.3 2.9 1.2 2.9.8 3.4.8.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z" />} s={17} fill="currentColor" />
+                Chat on WhatsApp
+              </a>
             </div>
           </div>
-          <div className="border-t border-stone-800 pt-5 text-center">
-            <p className="text-[11px] text-stone-600">&copy; {new Date().getFullYear()} {SHOP.name}</p>
+          <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-white/40">
+            <span>© {new Date().getFullYear()} TAGITELA. All rights reserved.</span>
+            <span>{SHOP.website || 'tagitela.com'}</span>
           </div>
         </div>
       </footer>
 
-      {/* Cart FAB */}
-      {cc > 0 && <button onClick={() => setShowCart(true)} className="fixed bottom-5 right-5 h-14 pl-5 pr-6 bg-gray-900 hover:bg-gray-800 text-white rounded-2xl flex items-center gap-3 font-bold text-sm z-50 shadow-xl shadow-gray-900/20 transition-colors">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-        {cc} · {money(ct)}
-      </button>}
+      {cc > 0 && !showCart && <button onClick={() => setShowCart(true)} className="md:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-[400] text-white rounded-full px-6 py-3.5 font-bold shadow-xl flex items-center gap-3" style={{ background: BLUE }}><span>{cc} item{cc !== 1 ? 's' : ''}</span><span className="opacity-60">·</span><span>{money(ct)}</span></button>}
 
-      {/* Cart drawer */}
-      {showCart && <div onClick={() => setShowCart(false)} className="fixed inset-0 bg-black/40 z-[200]" />}
-      <div className={`fixed bottom-0 left-0 right-0 md:right-0 md:left-auto md:top-0 md:w-[400px] bg-white z-[201] flex flex-col rounded-t-2xl md:rounded-none max-h-[85vh] md:max-h-full shadow-2xl transition-transform duration-300 ${showCart ? 'translate-y-0 md:translate-x-0' : 'translate-y-full md:translate-x-full'}`}>
-        <div className="md:hidden flex justify-center pt-3 pb-1"><div className="w-10 h-1 bg-stone-200 rounded-full" /></div>
-        <div className="flex items-center justify-between px-5 py-3 border-b border-stone-100">
-          <h3 className="text-base font-bold">Your Order <span className="text-stone-400 font-normal text-sm">({cc})</span></h3>
-          <button onClick={() => setShowCart(false)} className="w-8 h-8 bg-stone-100 rounded-lg flex items-center justify-center text-stone-400 text-sm">✕</button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-5">
-          {!cart.length ? <p className="text-center py-16 text-stone-400 text-sm">Empty</p> : <div className="space-y-2.5">
-            {cart.map(c => <div key={c.id} className="flex items-center gap-3 p-3 bg-stone-50 rounded-xl">
-              <div className="w-11 h-11 bg-stone-200 rounded-lg overflow-hidden flex-shrink-0">{c.img ? <img src={thumb(c.img, 200)} alt="" className="w-full h-full object-cover" /> : null}</div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold truncate">{c.name}</p>
-                <p className="text-[11px] text-stone-400">{money(c.price)} each</p>
-                {c.isW && <p className="text-[10px] text-green-600 font-semibold">Wholesale</p>}
+      {showCart && <div className="fixed inset-0 z-[600] flex justify-end" style={{ colorScheme: 'light' }}>
+        <div className="absolute inset-0 bg-black/40" onClick={() => setShowCart(false)} />
+        <div className="relative bg-white w-full max-w-md flex flex-col h-full shadow-2xl">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100"><h3 className="text-base font-bold">Your Order <span className="text-gray-400 font-normal text-sm">({cc})</span></h3><button onClick={() => setShowCart(false)} className="text-gray-400 text-2xl leading-none">×</button></div>
+          <div className="flex-1 overflow-y-auto p-5">
+            {cart.length === 0 ? <div className="text-center py-20 text-gray-400 text-sm">Your order is empty.</div> : cart.map(c => (
+              <div key={c.id} className="flex gap-3 items-center py-3 border-b border-gray-50 last:border-0">
+                <div className="w-14 h-14 rounded-xl bg-gray-50 overflow-hidden flex-shrink-0">{c.img ? <img src={thumb(c.img, 120)} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-300"><I d={<path d="M3 9l1-5h16l1 5M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9" />} s={20} /></div>}</div>
+                <div className="flex-1 min-w-0"><p className="text-[13px] font-semibold text-gray-900 leading-tight line-clamp-2">{c.name}</p><div className="text-[13px] font-bold text-gray-900 mt-0.5">{money(c.price)} {c.isW && <span className="text-[10px] text-[#2563eb] font-bold">WHOLESALE</span>}</div></div>
+                <div className="flex items-center gap-2 flex-shrink-0"><button onClick={() => upd(c.id, -1)} className="w-7 h-7 border border-gray-200 rounded-lg text-sm font-bold flex items-center justify-center hover:bg-gray-50">−</button><span className="w-6 text-center text-sm font-bold">{c.qty}</span><button onClick={() => upd(c.id, 1)} className="w-7 h-7 border border-gray-200 rounded-lg text-sm font-bold flex items-center justify-center hover:bg-gray-50">+</button></div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <button onClick={() => upd(c.id, -1)} className="w-7 h-7 border border-stone-200 rounded-lg text-xs font-bold flex items-center justify-center">−</button>
-                <span className="w-5 text-center text-xs font-bold">{c.qty}</span>
-                <button onClick={() => upd(c.id, 1)} className="w-7 h-7 border border-stone-200 rounded-lg text-xs font-bold flex items-center justify-center">+</button>
-              </div>
-            </div>)}
+            ))}
+          </div>
+          {cart.length > 0 && <div className="p-5 border-t border-gray-100">
+            <div className="flex justify-between items-center mb-4"><span className="text-sm text-gray-400">{cc} item{cc !== 1 ? 's' : ''}</span><span className="text-xl font-extrabold">{money(ct)}</span></div>
+            <button onClick={order} disabled={ordering} className="w-full h-14 text-white rounded-2xl font-bold flex items-center justify-center gap-2.5 transition hover:opacity-90 disabled:opacity-60" style={{ background: BLUE }}>
+              <I d={<path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.6.1-.2.3-.7 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.2-.5.1-.2 0-.4 0-.5s-.6-1.5-.9-2c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.3-1 .9-1 2.3s1 2.7 1.1 2.9c.1.2 2 3.1 4.9 4.3 2.9 1.2 2.9.8 3.4.8.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z" />} s={20} fill="currentColor" />
+              {ordering ? 'Sending…' : 'Order on WhatsApp'}
+            </button>
+            <p className="text-[11px] text-gray-400 text-center mt-3">We'll confirm availability, price and delivery on WhatsApp.</p>
           </div>}
         </div>
-        {cart.length > 0 && <div className="p-5 border-t border-stone-100">
-          <div className="flex justify-between items-center mb-4"><span className="text-sm text-stone-400">{cc} item{cc !== 1 ? 's' : ''}</span><span className="text-xl font-bold">{money(ct)}</span></div>
-          <button onClick={order} disabled={ordering} className="w-full h-14 bg-[#2563eb] hover:bg-[#1d4ed8] disabled:opacity-60 text-white rounded-2xl font-bold flex items-center justify-center gap-2.5 transition-colors">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.612-1.21A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-2.115 0-4.142-.588-5.904-1.699l-.424-.252-2.732.717.73-2.667-.276-.44A9.72 9.72 0 012.25 12C2.25 6.624 6.624 2.25 12 2.25S21.75 6.624 21.75 12 17.376 21.75 12 21.75z"/></svg>
-            {ordering ? 'Sending…' : 'Order on WhatsApp'}
-          </button>
-          <button onClick={() => setCart([])} className="w-full h-8 text-stone-400 text-xs mt-2">Clear</button>
-        </div>}
-      </div>
+      </div>}
 
-      {/* Product modal */}
-      {view && (() => {
-        const rel = products.filter(p => p.id !== view.id && p.category && view.category && p.category === view.category && p.image).slice(0, 4)
-        const pr = promoMap[view.id], dp = pr ? pr.price : view.price
-        return <>
-          <div onClick={close} className="fixed inset-0 bg-black/50 z-[300]" />
-          <div className="fixed inset-3 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[460px] md:max-h-[85vh] bg-white rounded-2xl z-[301] overflow-hidden flex flex-col shadow-2xl">
-            <div className="flex-1 overflow-y-auto">
-              <div className="w-full aspect-square bg-stone-100 relative">
-                {view.image ? <img src={thumb(view.image, 800)} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-stone-50" />}
-                <button onClick={close} className="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur rounded-xl flex items-center justify-center text-stone-500 text-sm shadow">✕</button>
-                <button onClick={() => share(view)} className="absolute top-3 left-3 w-9 h-9 bg-white/90 backdrop-blur rounded-xl flex items-center justify-center shadow">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
-                </button>
-                {pr && <div className="absolute bottom-3 left-3 bg-[#0f172a] text-white text-[11px] font-bold px-3 py-1.5 rounded-xl">{pr.name}</div>}
-              </div>
-              <div className="p-5">
-                {view.category && <p className="text-xs text-stone-400 mb-1">{view.category}</p>}
-                <h2 className="text-lg font-bold text-stone-900 mb-2">{view.name}</h2>
-                {pr && <p className="text-sm text-stone-400 line-through">{money(view.price)}</p>}
-                <p className={`text-2xl font-bold ${pr ? 'text-red-600' : 'text-stone-900'}`}>{money(dp)}</p>
-                {pr && <div className="mt-2 bg-red-50 rounded-xl px-3 py-2 text-xs text-red-600 font-medium">Save {money(view.price - pr.price)}</div>}
-                {!pr && Number(view.wholesale_price || 0) > 0 && Number(view.wholesale_min_qty || 0) > 0 && <div className="mt-2 bg-gray-50 rounded-xl px-3 py-2"><p className="text-xs text-green-700 font-semibold">Wholesale: {money(view.wholesale_price)} each</p><p className="text-[11px] text-green-600">Buy {view.wholesale_min_qty}+ pieces</p></div>}
-                <button onClick={() => share(view)} className="flex items-center gap-1.5 mt-3 text-xs text-green-700 font-medium">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>Share
-                </button>
-                {rel.length > 0 && <div className="mt-5 pt-4 border-t border-stone-100">
-                  <h4 className="text-xs font-bold text-stone-800 mb-3 uppercase tracking-wider">You may also like</h4>
-                  <div className="flex gap-2.5 overflow-x-auto scrollbar-hide">
-                    {rel.map(r => <div key={r.id} onClick={() => open(r)} className="flex-shrink-0 w-24 cursor-pointer">
-                      <div className="w-24 h-20 bg-stone-100 rounded-lg overflow-hidden"><img src={thumb(r.image, 300)} alt="" className="w-full h-full object-cover" loading="lazy" /></div>
-                      <p className="text-[10px] font-medium text-stone-700 mt-1.5 line-clamp-2">{r.name}</p>
-                      <p className="text-[10px] font-bold text-stone-900">{money(r.price)}</p>
-                    </div>)}
-                  </div>
-                </div>}
-              </div>
-            </div>
-            <div className="p-4 border-t border-stone-100">
-              <button onClick={() => { add({ ...view, price: dp }); close() }} className="w-full h-12 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl text-sm font-semibold transition-colors">Add to Order</button>
+      {view && <div className="fixed inset-0 z-[600] flex items-end md:items-center justify-center p-0 md:p-6" style={{ colorScheme: 'light' }}>
+        <div className="absolute inset-0 bg-black/50" onClick={close} />
+        <div className="relative bg-white w-full max-w-lg md:rounded-3xl rounded-t-3xl max-h-[92vh] overflow-y-auto">
+          <button onClick={close} className="absolute top-4 right-4 z-10 w-9 h-9 bg-white/90 rounded-full flex items-center justify-center text-gray-500 text-xl shadow">×</button>
+          <div className="aspect-square bg-gray-50">{view.image ? <img src={thumb(view.image, 800)} alt={view.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-300"><I d={<path d="M3 9l1-5h16l1 5M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9" />} s={56} /></div>}</div>
+          <div className="p-6">
+            {view.category && <div className="text-[11px] font-bold text-[#2563eb] uppercase tracking-wide mb-1.5">{view.category}</div>}
+            <h2 className="text-xl font-extrabold text-gray-900 mb-2">{view.name}</h2>
+            <div className="flex items-baseline gap-2 mb-1"><span className="text-2xl font-extrabold">{money(dprice(view))}</span>{promoMap[view.id] && <span className="text-base text-gray-400 line-through">{money(view.price)}</span>}</div>
+            {view.wholesale_price > 0 && view.wholesale_min_qty > 0 && <p className="text-[13px] text-[#2563eb] font-semibold mb-4">Buy {view.wholesale_min_qty}+ at {money(view.wholesale_price)} each</p>}
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => { add({ ...view, price: dprice(view) }); close() }} className="flex-1 h-12 text-white rounded-xl text-sm font-bold transition hover:opacity-90" style={{ background: BLUE }}>Add to Order</button>
+              <button onClick={() => share(view)} className="h-12 px-4 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition"><I d={<><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98" /></>} s={18} /></button>
             </div>
           </div>
-        </>
-      })()}
+        </div>
+      </div>}
     </div>
   )
 }
